@@ -75,15 +75,51 @@ the-auto-judge/
 
 > **Status:** Active development — Sprint 1
 
-Detailed setup instructions will be added as the project stabilises. For now:
+This root README covers the shared project setup and local development flow. Detailed service-specific setup should live with each app so frontend and backend instructions can evolve independently.
+
+### Prerequisites
+
+Install these before working locally:
+
+- Node.js and npm
+- Python 3.11+
+- Docker
+- Docker Compose
+- A Supabase project
+- A Gemini API key
+
+### Basic Setup
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/kyzak-playz/the-auto-judge.git
    cd the-auto-judge
    ```
-2. Copy and populate environment variables for both `apps/frontend` and `apps/backend` (`.env.example` files coming soon).
-3. See each app's README for service-specific setup instructions.
+2. Prepare environment variables for both services:
+   - frontend variables for the Next.js app
+   - backend variables for FastAPI, Supabase, Redis, Docker sandbox execution, and Gemini
+3. Make sure Docker is running before starting the backend stack with Docker Compose.
+4. Use app-level package managers:
+   - frontend (`apps/frontend`) uses `pnpm`
+   - backend (`apps/backend`) will use `uv`
+
+### Local Development Flow
+
+Use this order when running the system locally:
+
+1. Start the backend services with Docker Compose
+2. Start the Next.js frontend locally
+
+The Docker Compose setup should run the backend components as separate services, such as the FastAPI API, Celery worker, Redis, and any other required backend dependency.
+
+### Full Setup References
+
+Keep detailed setup instructions inside each service directory:
+
+- Frontend setup: `apps/frontend/README.md`
+- Backend setup: `apps/backend/README.md`
+
+Those app-level docs should contain dependency installation, environment variable details, and run commands specific to their own environments.
 
 ---
 

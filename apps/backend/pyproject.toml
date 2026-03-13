@@ -1,0 +1,22 @@
+[project]
+name = "auto-judge-backend"
+version = "0.1.0"
+description = "Backend environment scaffold for The Auto Judge"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic-settings",
+    "python-dotenv",
+    "httpx",
+    "celery",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.uv]
+package = false

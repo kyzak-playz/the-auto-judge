@@ -10,6 +10,9 @@ dependencies = [
     "python-dotenv",
     "httpx",
     "celery",
+    "sqlmodel>=0.0.37",
+    "psycopg[binary,pool]>=3.3.3",
+    "redis>=7.4.0",
 ]
 
 [dependency-groups]

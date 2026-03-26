@@ -2,6 +2,14 @@
 
 This is the FastAPI backend scaffold for The Auto Judge.
 
+## Current Implementation Notes
+
+- Server check endpoint is currently `GET /` and returns a simple Hello world response.
+- Data layer direction is SQLModel with PostgreSQL hosted on Supabase.
+- Database driver choice is `psycopg[binary,pool]` (modern psycopg3 driver with pooling support).
+- Redis is included for queue/runtime integration.
+- Celery folder is scaffolded now; task definitions will be added when worker flows are implemented.
+
 ## Backend Folder Plan
 
 The backend is structured to keep API, business logic, schemas, and async worker code separated from day one.
@@ -69,3 +77,19 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Then open `http://localhost:8000/`.
+
+## Backend Dependency Decisions
+
+- `sqlmodel`
+  - Selected as the ORM/data-model layer for clean SQLAlchemy-based development with typed models.
+
+- `psycopg[binary,pool]`
+  - Selected as the PostgreSQL driver for new projects using psycopg3 features and connection pooling support.
+
+- `redis`
+  - Included as queue/message infrastructure for Celery integration.
+
+## Data Access Boundary
+
+- The backend uses SQLModel + PostgreSQL connectivity to the Supabase-hosted database.
+- Supabase Python SDK is not the primary data-access path in this backend scaffold.

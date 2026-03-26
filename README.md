@@ -27,7 +27,7 @@
 | Layer                | Technology                                                       |
 | -------------------- | ---------------------------------------------------------------- |
 | **Frontend**         | Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui |
-| **Backend**          | FastAPI (Python)                                                 |
+| **Backend**          | FastAPI (Python), SQLModel, psycopg3 (`psycopg[binary,pool]`)    |
 | **Task Queue**       | Celery + Redis                                                   |
 | **Execution Engine** | Docker isolated sandbox containers                               |
 | **Database**         | Supabase PostgreSQL (+ pgvector for future semantic search)      |

@@ -2,12 +2,18 @@
   "files.exclude": {
     "**/node_modules": true,
     "**/dist": true,
-    "**/legacy": true
+    "**/legacy": true,
+    "**/__pycache__": true,
+    "**/__pycache__/**": true,
+    "**/__init__.py": true
   },
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true,
     "**/rough": true,
-    "**/legacy": true
+    "**/legacy": true,
+    "**/__pycache__": true,
+    "**/__pycache__/**": true,
+    "**/__init__.py": true
   }
 }

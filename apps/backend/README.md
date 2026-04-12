@@ -93,3 +93,23 @@ Then open `http://localhost:8000/`.
 
 - The backend uses SQLModel + PostgreSQL connectivity to the Supabase-hosted database.
 - Supabase Python SDK is not the primary data-access path in this backend scaffold.
+
+## Models and Migrations
+
+- SQLModel table definitions now live under `app/models/` with one table per file:
+  - `user.py`
+  - `problem.py`
+  - `submission.py`
+  - `result.py`
+- Shared enums are defined in `app/models/enums.py`.
+- Alembic is initialized in `apps/backend/alembic` for migration-based schema changes.
+
+### Migration Commands
+
+From `apps/backend`:
+
+```bash
+uv run python -m alembic revision -m "describe change"
+uv run python -m alembic upgrade head
+uv run python -m alembic downgrade -1
+```

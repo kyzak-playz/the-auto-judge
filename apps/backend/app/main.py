@@ -1,6 +1,5 @@
 from fastapi import FastAPI
-
-from app.api.v1.endpoints.hello import router as hello_router
+from .api.v1.auth.sigin import router as signin_router
 
 app = FastAPI(title="The Auto Judge Backend")
-app.include_router(hello_router)
+app.include_router(signin_router)

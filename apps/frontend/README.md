@@ -24,6 +24,17 @@ The app runs on `http://localhost:3000` by default.
 NODE_ENV=production pnpm build
 ```
 
+## Environment Variables
+
+Create `apps/frontend/.env.local` with only public Supabase values:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY=sb_publishable_<your_key>
+```
+
+Keep all secret/service-role keys in backend-only environment files.
+
 ## Stack
 
 - Next.js App Router

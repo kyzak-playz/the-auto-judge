@@ -103,6 +103,11 @@ Install these before working locally:
    - frontend (`apps/frontend`) uses `pnpm`
    - backend (`apps/backend`) will use `uv`
 
+### Database Bootstrap Note
+
+- Initial schema bootstrap is done using the first Alembic migration script from `apps/backend`.
+- All future schema updates should continue through Alembic migrations.
+
 ### Local Development Flow
 
 Use this order when running the system locally:

@@ -66,6 +66,7 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 - User authenticates via the FastAPI backend.
 - On success, the server issues an **HTTP-Only Session Cookie** — preventing JavaScript access and mitigating XSS-based token theft.
 - Every subsequent request carries the cookie; the backend validates it against Supabase Auth before processing.
+- Hybrid bearer + refresh-cookie flow is documented as a future fallback option if cross-site reliability requires it.
 
 ### Code Execution Flow
 
@@ -204,6 +205,7 @@ users ──< submissions >── problems
 ### Database — Supabase (PostgreSQL)
 
 - Supabase provides managed PostgreSQL with built-in **Row Level Security (RLS)** and Auth.
+- Initial schema bootstrap was applied using the first Alembic migration script in the backend.
 - `pgvector` extension reserved for future semantic similarity search (e.g., finding similar past submissions or problems).
 
 ---

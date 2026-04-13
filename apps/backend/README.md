@@ -5,10 +5,12 @@ This is the FastAPI backend scaffold for The Auto Judge.
 ## Current Implementation Notes
 
 - Server check endpoint is currently `GET /` and returns a simple Hello world response.
+- Temporary test auth route exists at `POST /signin` in `app/api/v1/auth/sigin.py` and will be removed when concrete auth implementation begins.
 - Data layer direction is SQLModel with PostgreSQL hosted on Supabase.
 - Database driver choice is `psycopg[binary,pool]` (modern psycopg3 driver with pooling support).
 - Redis is included for queue/runtime integration.
 - Celery folder is scaffolded now; task definitions will be added when worker flows are implemented.
+- Current auth implementation target is HttpOnly cookie-based flow; hybrid bearer + refresh-cookie flow remains documented as a deferred option.
 
 ## Backend Folder Plan
 
@@ -19,8 +21,8 @@ apps/backend/
 ├── app/
 │   ├── api/
 │   │   └── v1/
-│   │       └── endpoints/
-│   │           └── hello.py
+│   │       └── auth/
+│   │           └── sigin.py
 │   ├── core/
 │   ├── services/
 │   ├── schemas/
@@ -37,7 +39,7 @@ apps/backend/
   - FastAPI app entrypoint.
   - Includes routers and global app setup.
 
-- `app/api/v1/endpoints/`
+- `app/api/v1/`
   - Versioned HTTP route handlers.
   - Keep handlers thin and delegate real logic to `services/`.
 
@@ -103,6 +105,17 @@ Then open `http://localhost:8000/`.
   - `result.py`
 - Shared enums are defined in `app/models/enums.py`.
 - Alembic is initialized in `apps/backend/alembic` for migration-based schema changes.
+- Initial schema has been applied in Supabase successfully using the first migration script (`0f1be5216f30`).
+
+## Environment Variables
+
+Current required backend variable:
+
+```env
+DATABASE_URI=postgresql://user:password@host:5432/dbname
+```
+
+Supabase auth and key variables are documented in the temporary setup plan and will be enforced in settings during concrete auth implementation.
 
 ### Migration Commands
 

@@ -1,1 +1,66 @@
-Generic single-database configuration.
+# Alembic Migrations (Backend)
+
+This folder contains the Alembic migration environment for the backend app.
+
+## Current Setup
+
+- `alembic.ini` lives in `apps/backend/`.
+- `script_location` points to `%(here)s/alembic`.
+- Migration files live in `apps/backend/alembic/versions/`.
+- Metadata source for autogeneration is `SQLModel.metadata`.
+- All model modules are imported in `alembic/env.py` via `import app.models` so Alembic can discover tables.
+
+## Database URL Source
+
+Database URL is not taken directly from the static `sqlalchemy.url` in `alembic.ini`.
+
+Instead, `alembic/env.py` sets it at runtime from:
+
+- `settings.database_uri` from `app/core/config.py`
+- Expected from environment file `.env.local` in `apps/backend`
+
+Example value in `.env.local`:
+
+```env
+DATABASE_URI=postgresql://user:password@host:5432/dbname
+```
+
+`env.py` automatically rewrites `postgresql://` to `postgresql+psycopg://` to match the project's psycopg3 driver.
+
+## Common Commands
+
+Run these from `apps/backend`:
+
+```bash
+uv run python -m alembic current
+uv run python -m alembic history
+uv run python -m alembic revision --autogenerate -m "describe change"
+uv run python -m alembic upgrade head
+uv run python -m alembic downgrade -1
+```
+
+## Initial Migration in This Repo
+
+- Revision: `0f1be5216f30`
+- File: `alembic/versions/0f1be5216f30_create_initial_schema_models.py`
+- Creates core tables: `user`, `problem`, `submission`, `result`
+- Creates PostgreSQL enum types used by models
+
+## Recommended Workflow
+
+1. Update SQLModel definitions in `app/models/`.
+2. Generate migration with `--autogenerate`.
+3. Review generated migration file carefully (especially enums, constraints, and indexes).
+4. Apply migration locally with `upgrade head`.
+5. Run backend tests and start the app to validate schema changes.
+
+## Troubleshooting
+
+- Missing `DATABASE_URI`:
+	Alembic will fail when loading settings. Ensure `.env.local` exists in `apps/backend` and defines `DATABASE_URI`.
+
+- Running command from wrong directory:
+	If Alembic cannot find `alembic.ini`, run commands from `apps/backend`.
+
+- Models not detected in autogenerate:
+	Ensure new models are imported through `app/models/__init__.py` so `import app.models` loads them.

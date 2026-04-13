@@ -1,8 +1,6 @@
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, create_engine
 
 from alembic import context
 
@@ -11,6 +9,12 @@ import app.models  # noqa: F401
 
 
 def _sqlalchemy_database_uri(raw_uri: str) -> str:
+    """Convert the database URI to a format compatible with SQLAlchemy.
+     - For PostgreSQL, SQLAlchemy expects the URI to start with "postgresql+psycopg:// instead of "postgresql://". This function performs that conversion if necessary.
+     - For other database types, the URI is returned unchanged.
+
+     change the URI to be compatible with SQLAlchemy if necessary
+     """
     if raw_uri.startswith("postgresql://"):
         return raw_uri.replace("postgresql://", "postgresql+psycopg://", 1)
     return raw_uri
@@ -69,11 +73,17 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    url = config.get_main_option("sqlalchemy.url")
+
+    # Ensure the URL is present before attempting to create an engine. If the URL is missing, raise a ValueError with a clear message.
+    if not url:
+        raise ValueError(
+            "sqlalchemy.url not configured. "
+            "Ensure DATABASE_URI is set in .env.local and _sqlalchemy_database_uri() "
+            "has called config.set_main_option() before run_migrations_online()."
+        )
+    
+    connectable = create_engine(url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)

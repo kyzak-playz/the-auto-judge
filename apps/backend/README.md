@@ -11,6 +11,7 @@ This is the FastAPI backend scaffold for The Auto Judge.
 - Redis is included for queue/runtime integration.
 - Celery folder is scaffolded now; task definitions will be added when worker flows are implemented.
 - Current auth implementation target is HttpOnly cookie-based flow; hybrid bearer + refresh-cookie flow remains documented as a deferred option.
+- Backend startup uses FastAPI lifespan for config validation and a lightweight DB connectivity check.
 
 ## Backend Folder Plan
 
@@ -24,6 +25,7 @@ apps/backend/
 │   │       └── auth/
 │   │           └── sigin.py
 │   ├── core/
+│   │   └── database.py
 │   ├── services/
 │   ├── schemas/
 │   ├── workers/
@@ -45,6 +47,9 @@ apps/backend/
 
 - `app/core/`
   - Core shared pieces such as settings, constants, and security helpers.
+
+- `app/core/database.py`
+  - SQLModel engine, session helper, and startup connectivity check.
 
 - `app/services/`
   - Business logic layer used by API routes and workers.
@@ -106,6 +111,7 @@ Then open `http://localhost:8000/`.
 - Shared enums are defined in `app/models/enums.py`.
 - Alembic is initialized in `apps/backend/alembic` for migration-based schema changes.
 - Initial schema has been applied in Supabase successfully using the first migration script (`0f1be5216f30`).
+- The initial RLS migration is `bf3f1bab7a24_add_initial_rls_policies.py`.
 
 ## Environment Variables
 
@@ -115,7 +121,7 @@ Current required backend variable:
 DATABASE_URI=postgresql://user:password@host:5432/dbname
 ```
 
-Supabase auth and key variables are documented in the temporary setup plan and will be enforced in settings during concrete auth implementation.
+Keep Supabase project values in backend env files only. The current runtime checks require `DATABASE_URI`, `SUPABASE_URL`, `SUPABASE_SECRET`, and `SUPABASE_JWT_SIGNING_KEY` in non-dev environments.
 
 ### Migration Commands
 

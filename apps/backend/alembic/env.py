@@ -9,23 +9,16 @@ import app.models  # noqa: F401
 
 
 def _sqlalchemy_database_uri(raw_uri: str) -> str:
-    """Convert the database URI to a format compatible with SQLAlchemy.
-     - For PostgreSQL, SQLAlchemy expects the URI to start with "postgresql+psycopg:// instead of "postgresql://". This function performs that conversion if necessary.
-     - For other database types, the URI is returned unchanged.
-
-     change the URI to be compatible with SQLAlchemy if necessary
-     """
+    """Convert DATABASE_URI to an SQLAlchemy-compatible driver URL."""
     if raw_uri.startswith("postgresql://"):
         return raw_uri.replace("postgresql://", "postgresql+psycopg://", 1)
     return raw_uri
 
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+# Alembic config object, populated from alembic.ini.
 config = context.config
 
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
@@ -35,11 +28,6 @@ target_metadata = SQLModel.metadata
 config.set_main_option(
     "sqlalchemy.url", _sqlalchemy_database_uri(settings.database_uri)
 )
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
 
 
 def run_migrations_offline() -> None:
@@ -75,14 +63,14 @@ def run_migrations_online() -> None:
     """
     url = config.get_main_option("sqlalchemy.url")
 
-    # Ensure the URL is present before attempting to create an engine. If the URL is missing, raise a ValueError with a clear message.
+    # Fail early with a clear environment-variable reference.
     if not url:
         raise ValueError(
             "sqlalchemy.url not configured. "
             "Ensure DATABASE_URI is set in .env.local and _sqlalchemy_database_uri() "
             "has called config.set_main_option() before run_migrations_online()."
         )
-    
+
     connectable = create_engine(url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:

@@ -1,4 +1,5 @@
 from sqlalchemy.engine import Engine
+from sqlalchemy import text
 from collections.abc import Generator
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -32,3 +33,8 @@ def get_session() -> Generator[Session, None, None]:
 
 def create_db_and_tables() -> None:
     SQLModel.metadata.create_all(engine)
+
+
+def check_database_connection() -> None:
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))

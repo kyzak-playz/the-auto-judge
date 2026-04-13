@@ -17,24 +17,24 @@
 | **AI-Powered Feedback**      | Gemini API provides structured code reviews, time-complexity analysis, and contextual hints without spoiling the solution |
 | **Hint System**              | Students can request contextual hints per submission; hint usage is tracked and limited per submission                    |
 | **Role-Based Access**        | Students submit and view results; Admins/Teachers manage problems, test cases, and review performance reports             |
-| **Robust Authentication**    | HTTP-Only session cookies issued by FastAPI + Supabase Auth — resistant to XSS-based token theft                          |
+| **Robust Authentication**    | HTTP-Only cookies issued by FastAPI; hybrid bearer + refresh-cookie flow is deferred                                      |
 | **Responsive UI**            | Modern, accessible interface built with Next.js, Tailwind CSS, and shadcn/ui components                                   |
 
 ---
 
 ## 💻 Technology Stack
 
-| Layer                | Technology                                                       |
-| -------------------- | ---------------------------------------------------------------- |
-| **Frontend**         | Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui |
-| **Backend**          | FastAPI (Python), SQLModel, psycopg3 (`psycopg[binary,pool]`)    |
-| **Task Queue**       | Celery + Redis                                                   |
-| **Execution Engine** | Docker isolated sandbox containers                               |
-| **Database**         | Supabase PostgreSQL (+ pgvector for future semantic search)      |
-| **Auth**             | Supabase Auth (HTTP-Only session cookies)                        |
-| **AI Integration**   | Google Gemini API                                                |
-| **Frontend Hosting** | Vercel CDN                                                       |
-| **Backend Hosting**  | Dedicated VPS                                                    |
+| Layer                | Technology                                                                     |
+| -------------------- | ------------------------------------------------------------------------------ |
+| **Frontend**         | Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui               |
+| **Backend**          | FastAPI (Python), SQLModel, psycopg3 (`psycopg[binary,pool]`)                  |
+| **Task Queue**       | Celery + Redis                                                                 |
+| **Execution Engine** | Docker isolated sandbox containers                                             |
+| **Database**         | Supabase PostgreSQL (+ pgvector for future semantic search)                    |
+| **Auth**             | FastAPI HttpOnly cookie flow now; hybrid bearer + refresh-cookie flow deferred |
+| **AI Integration**   | Google Gemini API                                                              |
+| **Frontend Hosting** | Vercel CDN                                                                     |
+| **Backend Hosting**  | Dedicated VPS                                                                  |
 
 ---
 
@@ -96,8 +96,8 @@ Install these before working locally:
    cd the-auto-judge
    ```
 2. Prepare environment variables for both services:
-   - frontend variables for the Next.js app
-   - backend variables for FastAPI, Supabase, Redis, Docker sandbox execution, and Gemini
+   - frontend variables: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY`
+   - backend variables: `DATABASE_URI`, Supabase URL, secret key, JWT signing key, and app/runtime settings
 3. Make sure Docker is running before starting the backend stack with Docker Compose.
 4. Use app-level package managers:
    - frontend (`apps/frontend`) uses `pnpm`
@@ -105,7 +105,8 @@ Install these before working locally:
 
 ### Database Bootstrap Note
 
-- Initial schema bootstrap is done using the first Alembic migration script from `apps/backend`.
+- Initial schema bootstrap was applied using the first Alembic migration script from `apps/backend`.
+- RLS policies live in a follow-up Alembic migration.
 - All future schema updates should continue through Alembic migrations.
 
 ### Local Development Flow

@@ -64,8 +64,7 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 ### Authentication Flow
 
 - User authenticates via the FastAPI backend.
-- On success, the server issues an **HTTP-Only Session Cookie** — preventing JavaScript access and mitigating XSS-based token theft.
-- Every subsequent request carries the cookie; the backend validates it against Supabase Auth before processing.
+- The current implementation uses an **HTTP-Only cookie** flow to keep tokens out of JavaScript.
 - Hybrid bearer + refresh-cookie flow is documented as a future fallback option if cross-site reliability requires it.
 
 ### Code Execution Flow
@@ -96,12 +95,12 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 
 ### Data Stores
 
-| Store                   | Maps&nbsp;To        | Contents                                            |
-| ----------------------- | ------------------- | --------------------------------------------------- |
-| **D1** User Store       | `users` table       | Credentials, roles                                  |
-| **D2** Submission Store | `submissions` table | Source code, language, status, hints used           |
-| **D3** Problem Store    | `problems` table    | Problem description, difficulty, test cases (JSONB) |
-| **D4** Result Store     | `results` table     | Score, AI feedback JSON, execution time             |
+| Store                   | Maps&nbsp;To       | Contents                                            |
+| ----------------------- | ------------------ | --------------------------------------------------- |
+| **D1** User Store       | `user` table       | Credentials, roles                                  |
+| **D2** Submission Store | `submission` table | Source code, language, status, hints used           |
+| **D3** Problem Store    | `problem` table    | Problem description, difficulty, test cases (JSONB) |
+| **D4** Result Store     | `result` table     | Score, AI feedback JSON, execution time             |
 
 ---
 
@@ -111,7 +110,7 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 
 ### Tables
 
-#### `users`
+#### `user`
 
 | Column     | Type                      | Constraint       |
 | ---------- | ------------------------- | ---------------- |
@@ -120,7 +119,7 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 | `email`    | VARCHAR                   | NOT NULL, UNIQUE |
 | `role`     | ENUM (`student`, `admin`) | NOT NULL         |
 
-#### `problems`
+#### `problem`
 
 | Column        | Type                             | Constraint                                  |
 | ------------- | -------------------------------- | ------------------------------------------- |
@@ -130,34 +129,34 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 | `difficulty`  | VARCHAR (`easy`/`medium`/`hard`) |                                             |
 | `test_case`   | JSONB                            | Array of `{input, expected_output}` objects |
 
-#### `submissions`
+#### `submission`
 
 | Column          | Type    | Constraint                                                                                    |
 | --------------- | ------- | --------------------------------------------------------------------------------------------- |
 | `submission_id` | UUID    | PK                                                                                            |
-| `user_id`       | UUID    | FK → `users.user_id`                                                                          |
-| `problem_id`    | UUID    | FK → `problems.problem_id`                                                                    |
+| `user_id`       | UUID    | FK → `user.id`                                                                                |
+| `problem_id`    | UUID    | FK → `problem.id`                                                                             |
 | `source_code`   | TEXT    |                                                                                               |
 | `language`      | VARCHAR | e.g. `python`, `cpp`, `java`                                                                  |
 | `status`        | VARCHAR | `pending` / `running` / `accepted` / `wrong_answer` / `runtime_error` / `time_limit_exceeded` |
 | `hints_used`    | INTEGER | Default 0                                                                                     |
 
-#### `results`
+#### `result`
 
-| Column          | Type    | Constraint                       |
-| --------------- | ------- | -------------------------------- |
-| `result_id`     | UUID    | PK                               |
-| `submission_id` | UUID    | FK → `submissions.submission_id` |
-| `score`         | INTEGER | 0–100                            |
-| `ai_feedback`   | JSONB   | Structured Gemini response       |
-| `exec_time`     | FLOAT   | Seconds                          |
+| Column          | Type    | Constraint                 |
+| --------------- | ------- | -------------------------- |
+| `result_id`     | UUID    | PK                         |
+| `submission_id` | UUID    | FK → `submission.id`       |
+| `score`         | INTEGER | 0–100                      |
+| `ai_feedback`   | JSONB   | Structured Gemini response |
+| `exec_time`     | FLOAT   | Seconds                    |
 
 ### Relationships
 
 ```
-users ──< submissions >── problems
+user ──< submission >── problem
               │
-              └──< results
+              └──< result
 ```
 
 ---
@@ -206,6 +205,7 @@ users ──< submissions >── problems
 
 - Supabase provides managed PostgreSQL with built-in **Row Level Security (RLS)** and Auth.
 - Initial schema bootstrap was applied using the first Alembic migration script in the backend.
+- Initial RLS posture is handled by a follow-up Alembic migration that enables RLS and adds public read access for `problem`.
 - `pgvector` extension reserved for future semantic similarity search (e.g., finding similar past submissions or problems).
 
 ---

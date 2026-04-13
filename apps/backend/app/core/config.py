@@ -1,5 +1,10 @@
 from functools import lru_cache
+import logging
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -11,11 +16,35 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "The Auto Judge Backend"
-    database_uri: str
+    app_env: str = "development"
+    database_uri: str = Field(validation_alias="DATABASE_URI")
+    supabase_url: str | None = None
+    supabase_secret: str | None = None
+    supabase_jwt_signing_key: str | None = None
+    supabase_publishable_key: str | None = None
 
-# lru_cache is used to ensure that the settings are only loaded once and cached for future use. 
-# This is important because loading settings from the environment can be an expensive operation, 
-# and we want to avoid doing it multiple times throughout the application.
+    def validate_runtime_requirements(self) -> None:
+        required = {
+            "DATABASE_URI": self.database_uri,
+            "SUPABASE_URL": self.supabase_url,
+            "SUPABASE_SECRET": self.supabase_secret,
+            "SUPABASE_JWT_SIGNING_KEY": self.supabase_jwt_signing_key,
+        }
+        missing = [key for key, value in required.items() if not value]
+        if not missing:
+            return
+
+        message = (
+            "Missing required backend configuration values: " + ", ".join(missing) + "."
+        )
+
+        if self.app_env.lower() in {"development", "dev", "local"}:
+            logger.warning(message)
+            return
+
+        raise RuntimeError(message)
+
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()  # pyright: ignore[reportCallIssue]

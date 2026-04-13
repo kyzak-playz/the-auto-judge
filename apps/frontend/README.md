@@ -35,6 +35,12 @@ NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY=sb_publishable_<your_key>
 
 Keep all secret/service-role keys in backend-only environment files.
 
+## Public Data Access
+
+- The shared Supabase client lives in `src/lib/supabase.ts`.
+- The home page public problems section fetches live problem rows with that client.
+- Keep frontend reads limited to public data only; privileged operations stay backend-side.
+
 ## Stack
 
 - Next.js App Router

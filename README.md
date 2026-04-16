@@ -105,9 +105,11 @@ Install these before working locally:
 
 ### Database Bootstrap Note
 
-- Initial schema bootstrap was applied using the first Alembic migration script from `apps/backend`.
-- RLS policies live in a follow-up Alembic migration.
+- Initial schema bootstrap is already applied using the first Alembic migration script from `apps/backend`.
+- RLS policies are already applied in a follow-up Alembic migration.
 - All future schema updates should continue through Alembic migrations.
+- Backend startup now validates required runtime config and checks database connectivity during lifespan startup.
+- Frontend public reads use the shared Supabase client and only expose publishable-key access.
 
 ### Local Development Flow
 
@@ -126,6 +128,11 @@ Keep detailed setup instructions inside each service directory:
 - Backend setup: `apps/backend/README.md`
 
 Those app-level docs should contain dependency installation, environment variable details, and run commands specific to their own environments.
+
+### Known Gaps
+
+- The full Docker Compose local stack is still a milestone item, so the repository does not yet have a complete one-command backend orchestration flow.
+- Full production auth hardening remains in progress; the docs should be treated as current-state guidance, not a finished release checklist.
 
 ---
 

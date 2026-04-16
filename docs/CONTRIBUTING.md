@@ -27,6 +27,13 @@ Thank you for your interest in contributing! This document outlines the workflow
 
 > If you plan to work on a significant feature, open an Issue first to discuss the approach before writing code.
 
+### Local Tooling
+
+- Backend commands should use `uv run` from `apps/backend`.
+- Frontend commands should use `pnpm` from `apps/frontend`.
+- Create Alembic migrations through the CLI instead of writing new revision files by hand.
+- Keep temporary planning notes outside the repository docs once the permanent docs are updated.
+
 ---
 
 ## Branching Model
@@ -142,6 +149,11 @@ Describe any manual or automated testing performed.
 - Do not commit secrets, `.env` files, or credentials.
 - Do not leave `console.log` / `print` debug statements in production code.
 - Write self-documenting code; add comments only where the logic is non-obvious.
+
+### Documentation Updates
+
+- Update `README.md`, `docs/architecture.md`, or app-level READMEs when behavior, setup, or workflow changes.
+- If a setup step is still unfinished, document it as future work instead of implying it already exists.
 
 ---
 

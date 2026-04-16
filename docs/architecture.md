@@ -239,3 +239,14 @@ The following are gaps or enhancements worth considering as the system matures:
 | 8   | **Admin Analytics Dashboard**     | Student performance reports (DFD Level 0) need a dedicated analytics endpoint aggregating submission stats per student/problem                         |
 | 9   | **Result Caching**                | Cache identical `(source_code_hash, problem_id)` pairs in Redis to avoid re-running duplicate submissions                                              |
 | 10  | **Problem Versioning**            | `test_case` is a JSONB blob; if test cases change after submissions exist, historical results become inconsistent — consider a `problem_version` field |
+
+### Current Implementation Gaps
+
+These items are still intentionally incomplete in the repository and should remain documented as future work rather than implied as finished:
+
+- Full production auth hardening and the broader auth rollout.
+- Docker Compose orchestration for the complete local stack.
+- Queue and worker implementation beyond the scaffolded packages.
+- A dedicated backend health endpoint beyond lifespan startup validation.
+- Key rotation and environment hygiene procedures for Supabase secrets.
+- Any BFF-style Next.js proxy layer for cookie reliability.

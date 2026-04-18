@@ -9,7 +9,8 @@ This is the FastAPI backend scaffold for The Auto Judge.
 - Data layer direction is SQLModel with PostgreSQL hosted on Supabase.
 - Database driver choice is `psycopg[binary,pool]` (modern psycopg3 driver with pooling support).
 - Redis is included for queue/runtime integration.
-- Celery folder is scaffolded now; task definitions will be added when worker flows are implemented.
+- Celery app wiring exists now; task definitions will be added when worker flows are implemented.
+- The root Compose stack now starts Redis, the FastAPI API, and the Celery worker together for local development.
 - Current auth implementation target is HttpOnly cookie-based flow; hybrid bearer + refresh-cookie flow remains documented as a deferred option.
 - Backend startup uses FastAPI lifespan for config validation and a lightweight DB connectivity check.
 
@@ -85,6 +86,23 @@ uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Then open `http://localhost:8000/`.
 
+## Local Run With Docker Compose
+
+From the repo root:
+
+```bash
+docker compose up --build
+```
+
+To build and start separately:
+
+```bash
+docker compose build
+dockeo compose up
+```
+
+The backend and worker services both read `apps/backend/.env.local` through Compose and mount the backend source tree for live reload. Redis is available at `redis://redis:6379/0` inside the Compose network.
+
 ## Backend Dependency Decisions
 
 - `sqlmodel`
@@ -122,6 +140,8 @@ DATABASE_URI=postgresql://user:password@host:5432/dbname
 ```
 
 Keep Supabase project values in backend env files only. The current runtime checks require `DATABASE_URI`, `SUPABASE_URL`, `SUPABASE_SECRET`, and `SUPABASE_JWT_SIGNING_KEY` in non-dev environments.
+
+For local Compose development, keep the values in `apps/backend/.env.local` and avoid conflicting root-level env files so the backend settings loader keeps the backend-local file as the primary source.
 
 ### Migration Commands
 

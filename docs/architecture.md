@@ -245,8 +245,8 @@ The following are gaps or enhancements worth considering as the system matures:
 These items are still intentionally incomplete in the repository and should remain documented as future work rather than implied as finished:
 
 - Full production auth hardening and the broader auth rollout.
-- Docker Compose orchestration for the complete local stack.
-- Queue and worker implementation beyond the scaffolded packages.
+- Frontend orchestration is still separate; the current Compose stack only covers the backend API, Redis, and the Celery worker.
+- Queue task definitions and job pipeline beyond the scaffolded Celery app.
 - A dedicated backend health endpoint beyond lifespan startup validation.
 - Key rotation and environment hygiene procedures for Supabase secrets.
 - Any BFF-style Next.js proxy layer for cookie reliability.

@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from .api.v1.auth.sigin import router as signin_router
+from .api.v1.tasks import router as tasks_router
 from .core.config import settings
 from .core.database import check_database_connection
 
@@ -28,3 +29,4 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="The Auto Judge Backend", lifespan=lifespan)
 app.include_router(signin_router)
+app.include_router(tasks_router)

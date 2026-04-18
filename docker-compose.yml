@@ -1,0 +1,71 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    working_dir: /app
+    command:
+      [
+        "uv",
+        "run",
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--reload",
+      ]
+    env_file:
+      - ./apps/backend/.env.local
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./apps/backend/app:/app/app
+      - ./apps/backend/alembic:/app/alembic
+      - ./apps/backend/alembic.ini:/app/alembic.ini:ro
+      - ./apps/backend/.env.local:/app/.env.local:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    working_dir: /app
+    command:
+      [
+        "uv",
+        "run",
+        "celery",
+        "-A",
+        "app.workers.celery_app:celery_app",
+        "worker",
+        "--loglevel=info",
+      ]
+    env_file:
+      - ./apps/backend/.env.local
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./apps/backend/app:/app/app
+      - ./apps/backend/alembic:/app/alembic
+      - ./apps/backend/alembic.ini:/app/alembic.ini:ro
+      - ./apps/backend/.env.local:/app/.env.local:ro
+    depends_on:
+      redis:
+        condition: service_healthy

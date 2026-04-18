@@ -61,6 +61,7 @@ the-auto-judge/
 ├── apps/
 │   ├── frontend/       # Next.js UI — deployed via Vercel
 │   └── backend/        # FastAPI gateway & API endpoints — deployed via VPS
+├── docker-compose.yml  # Local backend stack: backend, Redis, worker
 ├── docker/             # Dockerfiles for isolated execution sandboxes
 ├── docs/               # Architecture docs, DFD & ERD diagrams
 │   ├── architecture.md
@@ -98,6 +99,7 @@ Install these before working locally:
 2. Prepare environment variables for both services:
    - frontend variables: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY`
    - backend variables: `DATABASE_URI`, Supabase URL, secret key, JWT signing key, and app/runtime settings
+   - local backend file: `apps/backend/.env.local` is the primary file loaded by the container and backend settings
 3. Make sure Docker is running before starting the backend stack with Docker Compose.
 4. Use app-level package managers:
    - frontend (`apps/frontend`) uses `pnpm`
@@ -115,10 +117,13 @@ Install these before working locally:
 
 Use this order when running the system locally:
 
-1. Start the backend services with Docker Compose
+1. Start the backend services with Docker Compose from the repo root:
+   ```bash
+   docker compose up --build
+   ```
 2. Start the Next.js frontend locally
 
-The Docker Compose setup should run the backend components as separate services, such as the FastAPI API, Celery worker, Redis, and any other required backend dependency.
+The Compose stack starts Redis, the FastAPI backend, and the Celery worker. It keeps backend code mounted for live reload and reads backend configuration from `apps/backend/.env.local`.
 
 ### Full Setup References
 
@@ -131,7 +136,7 @@ Those app-level docs should contain dependency installation, environment variabl
 
 ### Known Gaps
 
-- The full Docker Compose local stack is still a milestone item, so the repository does not yet have a complete one-command backend orchestration flow.
+- The Compose stack currently covers the backend API, Redis, and the Celery worker; the frontend remains a separate local process.
 - Full production auth hardening remains in progress; the docs should be treated as current-state guidance, not a finished release checklist.
 
 ---

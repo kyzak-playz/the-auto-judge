@@ -26,17 +26,14 @@ class Settings(BaseSettings):
     def validate_runtime_requirements(self) -> None:
         required = {
             "DATABASE_URI": self.database_uri,
-            "SUPABASE_URL": self.supabase_url,
-            "SUPABASE_SECRET": self.supabase_secret,
-            "SUPABASE_JWT_SIGNING_KEY": self.supabase_jwt_signing_key,
+            "SUPABASE_URL": self.supabase_url
         }
         missing = [key for key, value in required.items() if not value]
         if not missing:
             return
 
-        message = (
-            "Missing required backend configuration values: " + ", ".join(missing) + "."
-        )
+        message = f"Missing required backend configuration values: {', '.join(missing)}."
+
 
         if self.app_env.lower() in {"development", "dev", "local"}:
             logger.warning(message)

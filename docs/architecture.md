@@ -63,9 +63,11 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 
 ### Authentication Flow
 
-- User authenticates via the FastAPI backend.
-- The current implementation uses an **HTTP-Only cookie** flow to keep tokens out of JavaScript.
-- Hybrid bearer + refresh-cookie flow is documented as a future fallback option if cross-site reliability requires it.
+- User authenticates via the FastAPI backend auth routes under `/api/v1/auth`.
+- The backend uses the Supabase Python SDK with an **HTTP-Only refresh token cookie** flow.
+- The current Supabase SDK integration is functional but not fully stateless-friendly.
+- Logout currently creates a temporary in-memory session from request credentials before signout, because the SDK signout operation depends on session state available in memory.
+- A single shared Supabase auth client was intentionally avoided because user context can override client state; auth routes currently create a new client instance per request.
 
 ### Code Execution Flow
 
@@ -174,7 +176,7 @@ user ──< submission >── problem
 - **Deployment:** Dedicated VPS (e.g., DigitalOcean, Hetzner)
 - **Responsibilities:** REST API, session validation, input sanitisation, task dispatching to Celery, proxying hint/feedback requests
 - **Key endpoints:**
-  - `POST /auth/login` — issues session cookie
+  - Auth routes are mounted under `/api/v1/auth`
   - `POST /submissions` — validates and queues submission
   - `GET /submissions/{id}` — polls result
   - `POST /hints` — triggers Hint Generator (6.0)
@@ -239,6 +241,8 @@ The following are gaps or enhancements worth considering as the system matures:
 | 8   | **Admin Analytics Dashboard**     | Student performance reports (DFD Level 0) need a dedicated analytics endpoint aggregating submission stats per student/problem                         |
 | 9   | **Result Caching**                | Cache identical `(source_code_hash, problem_id)` pairs in Redis to avoid re-running duplicate submissions                                              |
 | 10  | **Problem Versioning**            | `test_case` is a JSONB blob; if test cases change after submissions exist, historical results become inconsistent — consider a `problem_version` field |
+| 11  | **Auth Client Lifecycle**         | Evaluate alternatives to per-request Supabase client creation for auth operations while preventing user context leakage between requests               |
+| 12  | **Stateless Logout Design**       | Replace temporary in-memory session setup with a cleaner stateless revocation path if Supabase SDK/API options improve                                 |
 
 ### Current Implementation Gaps
 

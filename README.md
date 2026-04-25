@@ -24,17 +24,17 @@
 
 ## 💻 Technology Stack
 
-| Layer                | Technology                                                                     |
-| -------------------- | ------------------------------------------------------------------------------ |
-| **Frontend**         | Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui               |
-| **Backend**          | FastAPI (Python), SQLModel, psycopg3 (`psycopg[binary,pool]`)                  |
-| **Task Queue**       | Celery + Redis                                                                 |
-| **Execution Engine** | Docker isolated sandbox containers                                             |
-| **Database**         | Supabase PostgreSQL (+ pgvector for future semantic search)                    |
-| **Auth**             | FastAPI HttpOnly cookie flow now; hybrid bearer + refresh-cookie flow deferred |
-| **AI Integration**   | Google Gemini API                                                              |
-| **Frontend Hosting** | Vercel CDN                                                                     |
-| **Backend Hosting**  | Dedicated VPS                                                                  |
+| Layer                | Technology                                                         |
+| -------------------- | ------------------------------------------------------------------ |
+| **Frontend**         | Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui   |
+| **Backend**          | FastAPI (Python), SQLModel, psycopg3 (`psycopg[binary,pool]`)      |
+| **Task Queue**       | Celery + Redis                                                     |
+| **Execution Engine** | Docker isolated sandbox containers                                 |
+| **Database**         | Supabase PostgreSQL (+ pgvector for future semantic search)        |
+| **Auth**             | Supabase Python SDK (backend) + HttpOnly refresh-token cookie flow |
+| **AI Integration**   | Google Gemini API                                                  |
+| **Frontend Hosting** | Vercel CDN                                                         |
+| **Backend Hosting**  | Dedicated VPS                                                      |
 
 ---
 
@@ -98,12 +98,13 @@ Install these before working locally:
    ```
 2. Prepare environment variables for both services:
    - frontend variables: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY`
-   - backend variables: `DATABASE_URI`, Supabase URL, secret key, JWT signing key, and app/runtime settings
+   - backend variables: `DATABASE_URI`, `SUPABASE_URL`, `SUPABASE_SECRET`, `SUPABASE_ANON_KEY`, and app/runtime settings
    - local backend file: `apps/backend/.env.local` is the primary file loaded by the container and backend settings
 3. Make sure Docker is running before starting the backend stack with Docker Compose.
 4. Use app-level package managers:
    - frontend (`apps/frontend`) uses `pnpm`
    - backend (`apps/backend`) will use `uv`
+   - backend local dev helper: `make -C apps/backend dev`
 
 ### Database Bootstrap Note
 
@@ -138,6 +139,10 @@ Those app-level docs should contain dependency installation, environment variabl
 
 - The Compose stack currently covers the backend API, Redis, and the Celery worker; the frontend remains a separate local process.
 - Full production auth hardening remains in progress; the docs should be treated as current-state guidance, not a finished release checklist.
+- Supabase Python SDK auth is currently a rough fit for a stateless backend flow.
+- Logout currently depends on creating a temporary in-memory session from provided tokens before calling signout, because the SDK signout operation uses in-memory session context.
+- A shared long-lived Supabase client is currently avoided for auth routes: user context can override client state, so a new client instance is created per request.
+- Per-request client construction is currently accepted as a practical tradeoff; performance impact should be monitored during load testing.
 
 ---
 

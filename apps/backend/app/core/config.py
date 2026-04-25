@@ -18,15 +18,16 @@ class Settings(BaseSettings):
     app_name: str = "The Auto Judge Backend"
     app_env: str = "development"
     database_uri: str = Field(validation_alias="DATABASE_URI")
-    supabase_url: str | None = None
-    supabase_secret: str | None = None
-    supabase_jwt_signing_key: str | None = None
-    supabase_publishable_key: str | None = None
+    supabase_url: str = Field(validation_alias="SUPABASE_URL")
+    supabase_secret: str = Field(validation_alias="SUPABASE_SECRET")
+    supabase_anon_key: str = Field(validation_alias="SUPABASE_ANON_KEY")
 
     def validate_runtime_requirements(self) -> None:
         required = {
             "DATABASE_URI": self.database_uri,
-            "SUPABASE_URL": self.supabase_url
+            "SUPABASE_URL": self.supabase_url,
+            "SUPABASE_SECRET": self.supabase_secret,
+            "SUPABASE_ANON_KEY": self.supabase_anon_key,
         }
         missing = [key for key, value in required.items() if not value]
         if not missing:

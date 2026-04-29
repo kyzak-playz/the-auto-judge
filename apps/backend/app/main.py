@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from app.core.config import settings
 from app.core.database import check_database_connection
 
+from app.middleware.authentication import AuthenticationMiddleware
+
 # routers must be imported after settings to ensure configuration is loaded before any API calls are made
 from app.api.v1.auth import router as auth_router
 
@@ -27,6 +29,10 @@ async def lifespan(_: FastAPI):
 
     yield
 
-
 app = FastAPI(title="The Auto Judge Backend", lifespan=lifespan)
+
+# Middlewares
+app.add_middleware(AuthenticationMiddleware)
+
+#Routers
 app.include_router(auth_router, prefix="/api/v1/auth")

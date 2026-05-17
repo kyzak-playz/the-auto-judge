@@ -10,7 +10,7 @@ export function Footer() {
     return (
         <footer
             id="footer"
-            className="border-t border-white/10"
+            className="border-t border-white/10 "
             aria-label="Site footer"
         >
             <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-5 text-sm text-zinc-400 sm:px-8">

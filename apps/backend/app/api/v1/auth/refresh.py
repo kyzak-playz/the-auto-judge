@@ -1,9 +1,10 @@
 from typing_extensions import Annotated
-
-from fastapi import APIRouter, HTTPException, status, Response, Depends, Cookie
-from supabase import AsyncClient
+from fastapi import APIRouter, status, Response, Depends, Cookie
+from supabase import AsyncClient, AuthApiError
 from app.core.supabase_client import create_supabase_client
 from app.schemas.auth_schema import SignInResponse
+# custom error
+from app.exceptions import HTTPException
 
 router = APIRouter()
 @router.post("/refresh", tags=["auth"])
@@ -24,30 +25,29 @@ async def refresh_token(response: Response, refresh_token: Annotated[str, Cookie
     try:
         # Use the refresh token to get a new access token
         new_session = await supabase.auth.refresh_session(refresh_token=refresh_token)
-        
+        # If the refresh token is invalid or expired, the Supabase client will raise an AuthApiError, which we catch and convert to our custom HTTPException.
         if new_session is None or new_session.session is None:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token.",
+                status=status.HTTP_401_UNAUTHORIZED,
+                message="Invalid refresh token.",
+                code="INVALID_REFRESH_TOKEN"
             )
-        
-        # Update the refresh token cookie with the new refresh token
-        response.set_cookie(
-            key="refresh_token",
-            value=new_session.session.refresh_token,
-            httponly=True,
-            max_age=new_session.session.expires_in,
-            expires=new_session.session.expires_in,
-            samesite="strict",
-            secure=True,  # Set to True in production with HTTPS
-        )
         
         return SignInResponse(
             access_token=new_session.session.access_token,
-            token_type=new_session.session.token_type,
+            refresh_token=new_session.session.refresh_token,
             expires_in=new_session.session.expires_in,
         )
-    except Exception as e:
+    # Handle specific authentication errors from Supabase and convert them to our custom HTTPException for consistent error handling across the application.
+    except AuthApiError as e: # Handle authentication-related errors from Supabase
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )
+            status=e.status,
+            message=e.message,
+            code=e.code or "AUTH_ERROR"
+        ) from e
+    except Exception as e: # Handle any other unexpected errors
+        raise HTTPException(
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            message="An error occurred while refreshing the token.",
+            code="SERVER_ERROR"
+        ) from e

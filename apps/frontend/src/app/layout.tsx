@@ -1,7 +1,10 @@
+import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Navbar } from "@/components/shared/navbar";
-import { Footer } from "@/components/shared/footer";
+import { Navbar } from "@/components/shared/Navbar";
+import { Footer } from "@/components/shared/Footer";
+import AuthGuard from "@/components/wrapper/AuthGuard";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,18 +22,17 @@ export const metadata: Metadata = {
   description: "Frontend for The Auto Judge",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({children,}: Readonly<{children: React.ReactNode}>) {
+
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar />
-        {children}
+        <AuthGuard>
+          {children}
+        </AuthGuard>
         <Footer />
       </body>
     </html>

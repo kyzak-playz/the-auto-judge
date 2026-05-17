@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends
+from fastapi import APIRouter, status, Response, Depends
 from supabase import AsyncClient, AuthApiError
 from app.core.supabase_client import create_supabase_client
 from app.schemas.auth_schema import (
     LoginRequest,
     LoginResponse
 )
+# custom error
+from app.exceptions import HTTPException
 
 router = APIRouter()
 
@@ -33,28 +35,28 @@ async def login(request: LoginRequest, response: Response, supabase: AsyncClient
         )
 
         if auth_response is None or auth_response.session is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+            raise HTTPException(
+                status=status.HTTP_401_UNAUTHORIZED,
+                message="Invalid email or password",
+                code="UNAUTHORIZED"
+            )
 
-        response.set_cookie(
-            key="refresh_token",
-            value=auth_response.session.refresh_token,
-            httponly=True,
-            max_age=auth_response.session.expires_in,
-            expires=auth_response.session.expires_in,
-            samesite="strict",
-            secure=True,
-        )
         return LoginResponse(
             access_token=auth_response.session.access_token,
-            token_type=auth_response.session.token_type,
+            refresh_token=auth_response.session.refresh_token,
             expires_in=auth_response.session.expires_in,
         )
     # Handle specific exceptions
-    except HTTPException:       # re-raise FastAPI exceptions untouched
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid request body")
-
     except AuthApiError as e:   # known Supabase error
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
-    
+        raise HTTPException(
+            status=e.status,
+            message=e.message,
+            code=e.code or "AUTH_ERROR"
+        ) from e  # Preserve original exception for debugging purposes
+
     except Exception as e:      # fallback for unexpected errors
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        raise HTTPException(
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            message="An error occurred during login.",
+            code="SERVER_ERROR"
+        ) from e

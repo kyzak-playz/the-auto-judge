@@ -20,8 +20,8 @@ class SignInResponse(BaseModel):
     """Response model for user sign-in."""
 
     access_token: str
-    token_type: str
     expires_in: int = 60 * 3  # Access token expires in 3 minutes
+    refresh_token: str
 
 
 class LoginRequest(BaseModel):
@@ -50,7 +50,7 @@ class LoginResponse(BaseModel):
     """Response model for user login."""
 
     access_token: str
-    token_type: str
+    refresh_token: str
     expires_in: int = 60 * 3  # Access token expires in 3 minutes
 
 class LogoutRequest(BaseModel):

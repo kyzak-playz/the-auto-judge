@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Response, Depends
-from supabase import AsyncClient
+from fastapi import APIRouter, status, Response, Depends
+from supabase import AsyncClient, AuthApiError
 from app.core.supabase_client import create_supabase_client
 from app.schemas.auth_schema import SignInRequest, SignInResponse
+# custom error
+from app.exceptions import HTTPException
 
 router = APIRouter()
 
@@ -31,38 +33,32 @@ async def sign_up(request: SignInRequest, response: Response, supabase: AsyncCli
             {"email": request.email, "password": request.password}
         )
 
-        # sign_up may return no session (e.g., email confirmation flow)
-        if auth_response is None or auth_response.session is None:
+        # Check if the sign-up was successful and a session was created
+        if not auth_response.session:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Signup created, but no active session. Verify your email first.",
-            )
-        # check if user already exists (Supabase returns a 400 error with a specific message in this case)
-        if auth_response.user is None:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail="Email is already registered.",
-            )
-
-        # Set the refresh token in an HTTP-only cookie
-        response.set_cookie(
-            key="refresh_token",
-            value=auth_response.session.refresh_token,
-            httponly=True,
-            max_age=auth_response.session.expires_in,
-            expires=auth_response.session.expires_in,
-            samesite="strict",
-            secure=True,  # Set to True in production with HTTPS
+                status=status.HTTP_400_BAD_REQUEST,
+                message="Signup created but no active session.",
+                code="BAD_REQUEST"
             )
 
         response.status_code = status.HTTP_201_CREATED # Set status code to 201 Created for successful sign-up
         
         return SignInResponse(
             access_token=auth_response.session.access_token,
-            token_type=auth_response.session.token_type,
             expires_in=auth_response.session.expires_in,
+            refresh_token=auth_response.session.refresh_token
         )
+    # Handle specific exceptions
+    except AuthApiError as e:   # known Supabase error
+        raise HTTPException(
+            status=e.status,
+            message=e.message,
+            code=e.code or "AUTH_ERROR"
+        ) from e  # Preserve original exception for debugging purposes
+
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
-        )
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            message="An error occurred during signup.",
+            code="SERVER_ERROR"
+        ) from e # Preserve original exception for debugging purposes

@@ -4,7 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
 import Image from "next/image";
 import Link from "next/link";
-import logout from "@/actions/logut";
+import logout from "@/actions/logout";
 
 type ProfileComponentProps = {
     name?: string;

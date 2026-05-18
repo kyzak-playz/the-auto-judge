@@ -14,19 +14,19 @@ const logout = async (access_token: string): Promise<boolean> => {
     try {
         // Call the API route to logout the user
         const response = await fetch(
-            // `${process.env.BACKEND_URL}/api/logout`, 
-            "http://localhost:3000/api/logout", 
+            `${process.env.BACKEND_URL}/api/v1/auth/logout`,
             {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${access_token}`,
-                "refresh_token": refreshToken, // Include the refresh token in the header
+                "Authorization": `Bearer ${access_token}`, // Add Bearer prefix for standard authorization header format
             },
+            body: JSON.stringify({ refresh_token: refreshToken }), // Include the refresh token in the body
         });
 
         if (!response.ok) {
-            console.error("Logout failed with status:", response.status);
+            const error = await response.json()
+            console.error("Logout failed with status:", error);
             return false;
         }
 
@@ -38,6 +38,9 @@ const logout = async (access_token: string): Promise<boolean> => {
     } catch (error) {
         console.error("Logout error:", error);
         throw makeError(`Logout failed: ${error instanceof Error ? error.message : String(error)}`, 500, "LogoutError");
+    }
+    finally {
+        cookieStore.delete("refresh_token") // Ensure the refresh token cookie is deleted even if an error occurs
     }
 }
 

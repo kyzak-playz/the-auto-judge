@@ -37,7 +37,7 @@ export type UserCredentials = {
 export const UserResponseSchema = z.object({
     access_token: z.jwt({alg: "ES256"}),
     refresh_token: z.string(),
-    expiry: z.number()
+    expires_in: z.number()
 });
 
 type UserErrorResponse = {
@@ -64,5 +64,5 @@ export type UserResponse =
  */
 export type UserSession = {
     access_token: string;
-    expiry: number;
+    expires_in: number;
 }

@@ -10,7 +10,7 @@ export async function authenticateUser(
   try {
     // Call the API route to authenticate the user
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/${formData.authMode}`,
+      `${process.env.BACKEND_URL}/api/v1/auth/${formData.authMode}`,
       {
         method: "POST",
         headers: {
@@ -22,21 +22,19 @@ export async function authenticateUser(
 
     // Check if the response is successful
     if (!response.ok) {
-      type Erorr = { // temp
-        success: false;
-        error: {
+      type Erorr = {
           message: string;
           code: number;
           type: string;
-        }
       }
       const error: Erorr = await response.json();
+      console.log("Authentication error:", error);
       return {
         success: false,
         error: {
-          message: error.error.message,
+          message: error.message,
           code: response.status,
-          type: error.error.type,
+          type: error.type,
         },
       }
     }
@@ -65,7 +63,7 @@ export async function authenticateUser(
       data: {
         access_token: userData.access_token,
         refresh_token: userData.refresh_token,
-        expiry: userData.expiry,
+        expires_in: userData.expires_in,
       },
     };
   } catch (error) {

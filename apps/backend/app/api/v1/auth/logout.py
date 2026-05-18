@@ -14,7 +14,7 @@ Notes:
     - Ensure that the frontend application properly handles the logout process by calling this endpoint and clearing any client-side authentication state as needed.
 """
 from typing import Annotated
-from fastapi import APIRouter, Response, status, Cookie, Header
+from fastapi import APIRouter, Response, status, Header, Body
 from app.core.supabase_client import create_supabase_client
 from supabase import AsyncClient, AuthApiError
 
@@ -24,7 +24,7 @@ from app.exceptions import HTTPException
 router = APIRouter()
 
 @router.post("/logout", tags=["auth"])
-async def logout(access_token: Annotated[str, Header(...)], refresh_token: Annotated[str, Cookie(...)], response: Response):
+async def logout(Authorization: Annotated[str, Header(...)], refresh_token: Annotated[str, Body(..., embed=True )], response: Response):
     """
     Logout the user by clearing the refresh token cookie and revoking the session.
     
@@ -43,7 +43,7 @@ async def logout(access_token: Annotated[str, Header(...)], refresh_token: Annot
     """
     try:
         supabase: AsyncClient = await create_supabase_client()
-        # Set a temporary user session
+        access_token = Authorization.removeprefix("Bearer ").strip() # Extract the actual token value by removing the "Bearer " prefix and trimming whitespace
         user = await supabase.auth.set_session(access_token=access_token, refresh_token=refresh_token)
         if user is None:
             raise HTTPException(
@@ -51,10 +51,7 @@ async def logout(access_token: Annotated[str, Header(...)], refresh_token: Annot
                 message="Failed to set user session with provided tokens.",
                 code="SUPABASE_SESSION_ERROR"
             )
-        # Revoke the refresh token to invalidate the session
         await supabase.auth.sign_out({"scope": "local"})
-        # Clear the refresh token cookie
-        response.delete_cookie(key="refresh_token")
         response.status_code = status.HTTP_202_ACCEPTED # Set status code to 202 Accepted for successful logout
         return {"message": "Logout successful"}
     

@@ -1,14 +1,14 @@
 from typing_extensions import Annotated
-from fastapi import APIRouter, status, Response, Depends, Cookie
+from fastapi import APIRouter, status, Response, Depends
 from supabase import AsyncClient, AuthApiError
 from app.core.supabase_client import create_supabase_client
-from app.schemas.auth_schema import SignInResponse
+from app.schemas.auth_schema import SignInResponse, RefreshTokenRequest
 # custom error
 from app.exceptions import HTTPException
 
 router = APIRouter()
 @router.post("/refresh", tags=["auth"])
-async def refresh_token(response: Response, refresh_token: Annotated[str, Cookie(...)], supabase: Annotated[AsyncClient, Depends(create_supabase_client)]) -> SignInResponse:
+async def refresh_token(response: Response, refresh_token: RefreshTokenRequest, supabase: Annotated[AsyncClient, Depends(create_supabase_client)]) -> SignInResponse:
     """
     Refresh the access token using the refresh token stored in the HTTP-only cookie.
     
@@ -24,7 +24,7 @@ async def refresh_token(response: Response, refresh_token: Annotated[str, Cookie
     """
     try:
         # Use the refresh token to get a new access token
-        new_session = await supabase.auth.refresh_session(refresh_token=refresh_token)
+        new_session = await supabase.auth.refresh_session(refresh_token=refresh_token.refresh_token)
         # If the refresh token is invalid or expired, the Supabase client will raise an AuthApiError, which we catch and convert to our custom HTTPException.
         if new_session is None or new_session.session is None:
             raise HTTPException(

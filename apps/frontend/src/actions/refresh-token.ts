@@ -52,8 +52,7 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
 
     // Call the API route to refresh the token
     const response = await fetch(
-      // `${process.env.BACKEND_URL}/api/refresh`, 
-      "http://localhost:3000/api/refresh", 
+      `${process.env.BACKEND_URL}/api/v1/auth/refresh`,
       {
       method: "POST",
       headers: {
@@ -74,7 +73,6 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
     }
 
     const userData: TokenPayload = await response.json();
-    console.log("in refresh_token.ts file:", userData);
     // set the new refresh token in the cookie
       cookieStore.set({
         name: "refresh_token",
@@ -90,7 +88,7 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
       success: true,
       data: {
         accessToken: userData.access_token,
-        expiry: userData.expiry,
+        expires_in: userData.expires_in,
       },
     }
   } catch (error) {

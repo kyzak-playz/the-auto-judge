@@ -15,7 +15,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   authOpen: false,
   setUser: (user) => set({ user }),
   setAuthOpen: (open) => set({ authOpen: open }),
-  clearSession: () => set({ user: null, authOpen: true }), // expire session → show overlay
+  clearSession: () => set({ user: null}), // expire session → show overlay
 }));
 
 export const updateUserSession = (userSession: UserSession) => {

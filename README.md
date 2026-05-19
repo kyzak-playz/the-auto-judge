@@ -126,6 +126,12 @@ Use this order when running the system locally:
 
 The Compose stack starts Redis, the FastAPI backend, and the Celery worker. It keeps backend code mounted for live reload and reads backend configuration from `apps/backend/.env.local`.
 
+## Latest updates (May 2026)
+
+- Backend: added an authentication middleware for token validation and user extraction (`apps/backend/app/middleware/authentication.py`) and centralized HTTP/validation exception handlers (`apps/backend/app/exceptions.py`). Auth routes were normalized to raise `HttpException` when appropriate.
+- Frontend: implemented authentication UI and client flows (login/signup/refresh/logout), new auth components and hooks (`apps/frontend/src/components/shared/*`, `apps/frontend/src/hooks/*`), and a small client-side proxy for API requests (`apps/frontend/src/proxy.ts`) to simplify cookie handling during local development.
+- Notes: please run linters and tests and verify end-to-end auth flows (signup/login/refresh/logout) after pulling these updates.
+
 ### Full Setup References
 
 Keep detailed setup instructions inside each service directory:

@@ -9,6 +9,14 @@ This is the FastAPI backend for The Auto Judge.
 - Auth uses Supabase Python SDK with refresh-token cookies managed by FastAPI response headers.
 - The root Compose stack starts backend API, Redis, and Celery worker for local development.
 
+### Recent changes (May 2026)
+
+- Added `app/middleware/authentication.py` — middleware to validate tokens and extract user context during request processing.
+- Introduced `app/exceptions.py` and registered centralized HTTP/validation exception handlers in `app/main.py` to normalize error shapes returned by the API.
+- Auth endpoints (`login`, `signup`, `refresh`, `logout`) were updated to use the new error shapes and to raise `HttpException` where appropriate.
+
+Please validate auth flows (login/refresh/logout) locally after updating environment variables.
+
 ## Authentication Implementation Caveats
 
 The current auth implementation is intentionally basic and has known constraints:

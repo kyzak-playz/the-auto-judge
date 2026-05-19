@@ -69,6 +69,14 @@ Vercel CDN  ──── Next.js Frontend (SSR/SSG)
 - Logout currently creates a temporary in-memory session from request credentials before signout, because the SDK signout operation depends on session state available in memory.
 - A single shared Supabase auth client was intentionally avoided because user context can override client state; auth routes currently create a new client instance per request.
 
+Recent updates (May 2026):
+
+- A middleware was added to the backend (`app/middleware/authentication.py`) to perform token validation and user extraction at the request level, improving request handling consistency.
+- Centralized HTTP and validation exception handlers were introduced (`app/exceptions.py`) and registered in the application startup to normalize error responses and simplify frontend error handling.
+- The frontend implements an `AuthGuard` overlay and small client-side proxy (`apps/frontend/src/proxy.ts`) to improve local cookie-based flows and enable the auth UI (login/signup/refresh/logout) without brittle CORS or token passthrough configurations.
+
+Recommendation: validate end-to-end auth flows (signup/login/refresh/logout) after pulling these updates and running the local Compose stack alongside the frontend dev server.
+
 ### Code Execution Flow
 
 1. Frontend submits source code + problem ID via REST API.

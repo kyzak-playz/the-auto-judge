@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, ClassVar
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, DateTime, Enum as SQLEnum, Text, func
@@ -10,7 +10,7 @@ from app.models.enums import ProblemDifficulty
 
 
 class Problem(SQLModel, table=True):
-    __tablename__ = "problem"
+    __tablename__: ClassVar[str] = "problem"
 
     id: UUID = Field(
         default_factory=uuid4,

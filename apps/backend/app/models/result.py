@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, ClassVar
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
@@ -16,7 +16,7 @@ from sqlmodel import Field, SQLModel
 
 
 class Result(SQLModel, table=True):
-    __tablename__ = "result"
+    __tablename__: ClassVar[str] = "result"
     __table_args__ = (
         CheckConstraint("score >= 0 AND score <= 100", name="score_range"),
     )

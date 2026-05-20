@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import ClassVar
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, DateTime, Enum as SQLEnum, ForeignKey, Text, func
@@ -9,7 +10,7 @@ from app.models.enums import SubmissionStatus
 
 
 class Submission(SQLModel, table=True):
-    __tablename__ = "submission"
+    __tablename__: ClassVar[str] = "submission"
 
     id: UUID = Field(
         default_factory=uuid4,

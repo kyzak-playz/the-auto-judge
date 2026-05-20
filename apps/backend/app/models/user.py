@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
+from typing import ClassVar
 
 from sqlalchemy import Column, DateTime, Enum as SQLEnum, func
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
@@ -9,7 +10,7 @@ from app.models.enums import UserRole
 
 
 class User(SQLModel, table=True):
-    __tablename__ = "user"
+    __tablename__: ClassVar[str] = "user"
 
     id: UUID = Field(
         default_factory=uuid4,

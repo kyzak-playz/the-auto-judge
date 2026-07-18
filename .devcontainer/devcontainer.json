@@ -3,17 +3,17 @@
 
   "features": {
     "ghcr.io/devcontainers/features/node:2": {
-      "version": "20",
-      "pnpmVersion": "latest"
+      "version": "26.5.0",
+      "pnpmVersion": "11.13.0"
     },
     "ghcr.io/devcontainers/features/python:1": { "version": "3.12" },
     "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {},
     "ghcr.io/Stardevs/dev-container-features/redis-cli:1": {
-      "version": "latest",
+      "version": "8.8.0",
       "installServer": "true"
     },
     "ghcr.io/devcontainer-community/devcontainer-features/astral.sh-uv:1": {
-      "version": "latest"
+      "version": "0.11.29"
     }
   },
 

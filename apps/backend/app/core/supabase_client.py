@@ -9,9 +9,9 @@ async def create_supabase_client() -> AsyncClient:
     Create and return a Supabase client instance.
 
     ### Returns:
-        Client: An instance of the Supabase client configured with the URL and anonymous key from settings.
+        Client: An instance of the Supabase client configured with the URL and publishable key from settings.
     """
-    supabase =  await create_async_client(settings.supabase_url, settings.supabase_anon_key)
+    supabase =  await create_async_client(settings.supabase_url, settings.supabase_publishable_key)
     return supabase
 
 async def get_current_user(token: str):

@@ -20,14 +20,14 @@ class Settings(BaseSettings):
     database_uri: str = Field(validation_alias="DATABASE_URI")
     supabase_url: str = Field(validation_alias="SUPABASE_URL")
     supabase_secret: str = Field(validation_alias="SUPABASE_SECRET")
-    supabase_anon_key: str = Field(validation_alias="SUPABASE_ANON_KEY")
+    supabase_publishable_key: str = Field(validation_alias="SUPABASE_PUBLISHABLE_KEY")
 
     def validate_runtime_requirements(self) -> None:
         required = {
             "DATABASE_URI": self.database_uri,
             "SUPABASE_URL": self.supabase_url,
             "SUPABASE_SECRET": self.supabase_secret,
-            "SUPABASE_ANON_KEY": self.supabase_anon_key,
+            "SUPABASE_PUBLISHABLE_KEY": self.supabase_publishable_key,
         }
         missing = [key for key, value in required.items() if not value]
         if not missing:

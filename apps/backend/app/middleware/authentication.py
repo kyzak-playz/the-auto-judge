@@ -22,17 +22,17 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         # If request is not for a protected endpoint, skip authentication
         if not request.url.path.startswith("/api/v1/protected"):
             return await call_next(request)
-
-        # Extract the Authorization header
-        auth_header = request.headers.get('Authorization')
         
-        # Check if the Authorization header is present and starts with "Bearer "
+        # Extract the Access-token header
+        auth_header = request.headers.get('Access-token')
+        
+        # Check if the Access-token header is present and starts with "Bearer "
         # prefix is case-insensitive    
         if not auth_header or not auth_header.lower().startswith("bearer "):
             raise HTTPException(
                 status=401,
-                message="Unauthorized: Missing or invalid Authorization header",
-                code="IVALID_AUTH_HEADER"
+                message="Unauthorized: Missing or invalid Access-token header",
+                code="INVALID_ACCESS_TOKEN_HEADER"
             )
         
         # Extract the token from the header

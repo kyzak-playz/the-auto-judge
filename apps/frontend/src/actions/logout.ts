@@ -19,7 +19,7 @@ const logout = async (access_token: string): Promise<boolean> => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${access_token}`, // Add Bearer prefix for standard authorization header format
+                "Access-token": `Bearer ${access_token}`, // Add Bearer prefix for standard authorization header format
             },
             body: JSON.stringify({ refresh_token: refreshToken }), // Include the refresh token in the body
         });

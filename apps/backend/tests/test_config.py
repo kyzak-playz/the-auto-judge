@@ -10,6 +10,9 @@ def test_settings_loads_required_fields() -> None:
     settings = Settings(
         database_uri="postgresql://user:pass@localhost:5432/db",
         app_env="development",
+        supabase_url="https://example.supabase.co",
+        supabase_secret="secret",
+        supabase_publishable_key="publishable-key"
     )
 
     assert settings.database_uri == "postgresql://user:pass@localhost:5432/db"
@@ -32,6 +35,9 @@ def test_validate_runtime_requirements_dev_env_warns_on_missing(
     settings = Settings(
         database_uri="postgresql://user:pass@localhost:5432/db",
         app_env="development",
+        supabase_secret="secret",
+        supabase_publishable_key="publishable-key",
+        supabase_url="https://example.supabase.co"
     )
 
     with caplog.at_level(logging.WARNING):
@@ -46,6 +52,9 @@ def test_validate_runtime_requirements_non_dev_raises_on_missing() -> None:
     settings = Settings(
         database_uri="postgresql://user:pass@localhost:5432/db",
         app_env="production",
+        supabase_url="https://example.supabase.co",
+        supabase_secret="secret",
+        supabase_publishable_key="publishable-key"
     )
 
     with pytest.raises(RuntimeError) as exc_info:
@@ -62,7 +71,7 @@ def test_validate_runtime_requirements_succeeds_when_complete() -> None:
         app_env="production",
         supabase_url="https://example.supabase.co",
         supabase_secret="secret",
-        supabase_jwt_signing_key="jwt-key",
+        supabase_publishable_key="publishable-key"
     )
 
     settings.validate_runtime_requirements()

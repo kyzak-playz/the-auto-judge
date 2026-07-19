@@ -24,7 +24,7 @@ from app.exceptions import HTTPException
 router = APIRouter()
 
 @router.post("/logout", tags=["auth"])
-async def logout(Authorization: Annotated[str, Header(...)], refresh_token: Annotated[str, Body(..., embed=True )], response: Response):
+async def logout(Access_token: Annotated[str, Header(...)], refresh_token: Annotated[str, Body(..., embed=True )], response: Response):
     """
     Logout the user by clearing the refresh token cookie and revoking the session.
     
@@ -43,7 +43,7 @@ async def logout(Authorization: Annotated[str, Header(...)], refresh_token: Anno
     """
     try:
         supabase: AsyncClient = await create_supabase_client()
-        access_token = Authorization.removeprefix("Bearer ").strip() # Extract the actual token value by removing the "Bearer " prefix and trimming whitespace
+        access_token = Access_token.removeprefix("Bearer ").strip() # Extract the actual token value by removing the "Bearer " prefix and trimming whitespace
         user = await supabase.auth.set_session(access_token=access_token, refresh_token=refresh_token)
         if user is None:
             raise HTTPException(

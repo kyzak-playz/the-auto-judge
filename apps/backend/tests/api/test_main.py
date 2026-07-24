@@ -51,7 +51,9 @@ def test_lifespan_checks_database_connection_on_startup(
 def test_lifespan_warns_on_db_failure_in_dev(monkeypatch: pytest.MonkeyPatch) -> None:
     stub_settings = _StubSettings(app_env="development")
     monkeypatch.setattr(main, "settings", stub_settings)
-    monkeypatch.setattr(main, "check_database_connection", MagicMock(side_effect=Exception("boom")))
+    monkeypatch.setattr(
+        main, "check_database_connection", MagicMock(side_effect=Exception("boom"))
+    )
     warning_mock = MagicMock()
     monkeypatch.setattr(main.logger, "warning", warning_mock)
 
@@ -67,7 +69,9 @@ def test_lifespan_raises_on_db_failure_in_non_dev(
 ) -> None:
     stub_settings = _StubSettings(app_env="production")
     monkeypatch.setattr(main, "settings", stub_settings)
-    monkeypatch.setattr(main, "check_database_connection", MagicMock(side_effect=Exception("boom")))
+    monkeypatch.setattr(
+        main, "check_database_connection", MagicMock(side_effect=Exception("boom"))
+    )
 
     with pytest.raises(RuntimeError) as exc_info:
         with TestClient(main.app):

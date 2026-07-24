@@ -7,7 +7,7 @@ import pytest
 
 def _load_migration_module():
     migration_path = (
-        Path(__file__).resolve().parents[1]
+        Path(__file__).resolve().parents[2]
         / "alembic"
         / "versions"
         / "bf3f1bab7a24_add_initial_rls_policies.py"
@@ -23,7 +23,9 @@ migration = _load_migration_module()
 
 
 # Verifies upgrade enables RLS on all intended tables.
-def test_upgrade_enables_rls_on_all_target_tables(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_upgrade_enables_rls_on_all_target_tables(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     execute_mock = MagicMock()
     monkeypatch.setattr(migration.op, "execute", execute_mock)
 
@@ -46,7 +48,9 @@ def test_upgrade_creates_problem_public_read_policy(
     migration.upgrade()
 
     executed_sql = [call.args[0] for call in execute_mock.call_args_list]
-    assert any("CREATE POLICY problem_public_read_policy" in sql for sql in executed_sql)
+    assert any(
+        "CREATE POLICY problem_public_read_policy" in sql for sql in executed_sql
+    )
 
 
 # Verifies downgrade removes the public read policy before disabling RLS.

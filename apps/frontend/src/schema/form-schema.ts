@@ -2,7 +2,7 @@ import {z} from "zod";
 import type { UserSession } from "@/types/authTypes";
 
 export const FormSchema = z.object({
-    email: z.email({ error: "Please enter a valid email address" }).trim(),
+    username: z.email({ error: "Please enter a valid email address" }).trim(),
     password: z.string()
         .min(8, { error: "Password must be at least 8 characters long" })
         .max(20, { error: "Password must be at most 20 characters long" })
@@ -15,7 +15,7 @@ export const FormSchema = z.object({
 export type FormError = {
     success: false;
     error: {
-        email?: string[];
+        username?: string[];
         password?: string[];
         general?: string; // For non-field-specific errors, like authentication failures
     }
@@ -27,7 +27,7 @@ export type FormSuccess = {
 }
 
 export type FormState = {
-    email?: string;
+    username?: string;
     password?: string;
     authMode: "login" | "signup";
     result : FormError | FormSuccess;

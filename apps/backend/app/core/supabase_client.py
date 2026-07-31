@@ -3,6 +3,7 @@ This module provides utility functions for creating and managing a Supabase clie
 '''
 from app.core.config import settings
 from supabase import AsyncClient, create_async_client
+from supabase_auth import User
 
 async def create_supabase_client() -> AsyncClient:
     """
@@ -14,7 +15,7 @@ async def create_supabase_client() -> AsyncClient:
     supabase =  await create_async_client(settings.supabase_url, settings.supabase_publishable_key)
     return supabase
 
-async def get_current_user(token: str):
+async def supabase_user(token: str) -> User:
     """
     Get the current user information from the Supabase client using the provided access token.
 

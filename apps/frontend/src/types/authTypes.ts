@@ -23,10 +23,10 @@ export type AuthUIChildProps = {
 }
 
 /**
- * UserCredentials represents the data structure for user credentials that are required for authentication. It includes the email and password fields, which are necessary for both login and signup processes. Additionally, it includes the authMode field, which indicates whether the credentials are being used for a login or signup operation. This type is essential for handling user input in the authentication forms and ensuring that the correct actions are taken based on the specified authentication mode.
+ * UserCredentials represents the data structure for user credentials that are required for authentication. It includes the username and password fields, which are necessary for both login and signup processes. Additionally, it includes the authMode field, which indicates whether the credentials are being used for a login or signup operation. This type is essential for handling user input in the authentication forms and ensuring that the correct actions are taken based on the specified authentication mode.
  */
 export type UserCredentials = {
-    email: string;
+    username: string; // Email or username of the user
     password: string;
     authMode: AuthMode;
 }

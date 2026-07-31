@@ -1,8 +1,12 @@
 from collections.abc import Callable
-
-from fastapi import Request
+from typing import Annotated
+from fastapi import Request, Depends
+from fastapi.security import OAuth2PasswordBearer
+from app.core.supabase_client import supabase_user
+from app.schemas.auth_schema import SupabaseUser
 
 from app.exceptions import HTTPException
+
 
 
 def require_role(role: str) -> Callable[[Request], object]:
@@ -40,3 +44,24 @@ def require_role(role: str) -> Callable[[Request], object]:
         return user
 
     return dependency
+
+# OAuth2 scheme for handling token-based authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> SupabaseUser:
+    user = await supabase_user(token)
+    if not user:
+        raise HTTPException(
+            status=401,
+            message="Unauthorized: Invalid or expired token",
+            code="INVALID_TOKEN",
+        )
+    if user.email is None or user.role is None:
+        raise HTTPException(
+            status=401,
+            message="Unauthorized: User information is incomplete",
+            code="INCOMPLETE_USER_INFO",
+        )
+    user_obj = SupabaseUser(id=user.id, email=user.email, role=user.role)
+    
+    return user_obj

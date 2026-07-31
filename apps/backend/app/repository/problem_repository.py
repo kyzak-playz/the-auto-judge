@@ -1,7 +1,8 @@
 from sqlmodel import Session, select, desc
 from app.models.problem import Problem
-from app.schemas.problem_service_schemas import ProblemFilterSchema, ProblemUpdateSchema, ProblemListSchema
+from app.schemas.problem_service_schemas import ProblemFilterSchema, ProblemUpdateSchema, ProblemListSchema, ProblemDifficulty
 from uuid import UUID
+from  typing import cast
 
 class ProblemRepository:
     """
@@ -12,15 +13,19 @@ class ProblemRepository:
         self.user = user
         self.session = session
     
-    def create(self, problem_data: Problem) -> bool:
+    def create(self, problem_data: Problem) -> Problem:
         """
         Create a new problem in the database.
         """
 
-        self.session.add(problem_data)
-        self.session.commit()
-        self.session.refresh(problem_data)
-        return True
+        try:
+            self.session.add(problem_data)
+            self.session.commit()
+            self.session.refresh(problem_data)
+        except Exception as e:
+            self.session.rollback()
+            raise e
+        return problem_data
 
     def get_all(self, filters: ProblemFilterSchema | None = None) -> list[ProblemListSchema]:
         """
@@ -56,7 +61,7 @@ class ProblemRepository:
                 ProblemListSchema(
                     id=problem_id,
                     title=title,
-                    difficulty=difficulty,
+                    difficulty=cast(ProblemDifficulty, difficulty),
                     updated_at=updated_at,
                 )
             )
@@ -74,7 +79,7 @@ class ProblemRepository:
             return None  # Problem not found
         return problem
 
-    def update(self, problem_id: UUID, problem_data: ProblemUpdateSchema) -> bool:
+    def update(self, problem_id: UUID, problem_data: ProblemUpdateSchema) -> Problem | None:
         """
         Update an existing problem with the provided data.
         """
@@ -82,18 +87,19 @@ class ProblemRepository:
         # Retrieve the existing problem by its ID
         problem = self.get_by_id(problem_id)
         if problem is None:
-            return False  # Problem not found, cannot update
+            return None  # Problem not found
 
         # Update the fields of the existing problem with the new data
         data = problem_data.model_dump(exclude_unset=True)
         for key, value in data.items():
             setattr(problem, key, value)
-        
-        self.session.add(problem)
-        self.session.commit()
-        self.session.refresh(problem)
-
-        return True
+        try:
+            self.session.commit()
+            self.session.refresh(problem)
+            return problem
+        except Exception:
+            self.session.rollback()
+            raise
 
     def delete_by_id(self, problem_id: UUID) -> bool:
         """

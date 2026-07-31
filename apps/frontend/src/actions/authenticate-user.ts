@@ -14,9 +14,12 @@ export async function authenticateUser(
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded", // following the backend's expected content type
         },
-        body: JSON.stringify(formData),
+        body: new URLSearchParams({
+          username: formData.username,
+          password: formData.password,
+        }),
       },
     );
 

@@ -1,5 +1,5 @@
 from typing_extensions import Annotated
-from fastapi import APIRouter, status, Response, Depends
+from fastapi import APIRouter, status, Depends
 from supabase import AsyncClient, AuthApiError
 from app.core.supabase_client import create_supabase_client
 from app.schemas.auth_schema import SignInResponse, RefreshTokenRequest
@@ -7,8 +7,8 @@ from app.schemas.auth_schema import SignInResponse, RefreshTokenRequest
 from app.exceptions import HTTPException
 
 router = APIRouter()
-@router.post("/refresh", tags=["auth"])
-async def refresh_token(response: Response, refresh_token: RefreshTokenRequest, supabase: Annotated[AsyncClient, Depends(create_supabase_client)]) -> SignInResponse:
+@router.post("/refresh", tags=["auth"], status_code=status.HTTP_200_OK, response_model=SignInResponse)
+async def refresh_token(refresh_token: RefreshTokenRequest, supabase: Annotated[AsyncClient, Depends(create_supabase_client)]) -> SignInResponse:
     """
     Refresh the access token using the refresh token stored in the HTTP-only cookie.
     

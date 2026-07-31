@@ -1,5 +1,5 @@
 from app.repository.problem_repository import ProblemRepository as problem_repository
-from app.schemas.problem_service_schemas import ProblemFilterSchema, ProblemListSchema
+from app.schemas.problem_service_schemas import ProblemCreateSchema, ProblemDetailSchema, ProblemFilterSchema, ProblemListSchema
 from app.schemas.auth_schema import SupabaseUser
 from app.models.enums import UserRole
 from sqlmodel import Session
@@ -33,7 +33,7 @@ class ProblemsService:
             )
         return problems
 
-    def get_one_problem(self, problem_id: UUID) -> Problem | HTTPException:
+    def get_one_problem(self, problem_id: UUID) -> ProblemDetailSchema | HTTPException:
         """
         Retrieve a single problem by its ID.
         """
@@ -44,30 +44,27 @@ class ProblemsService:
                 message=f"Problem with ID {problem_id} not found.",
                 code="PROBLEM_NOT_FOUND"
             )
-        return problem
+        return ProblemDetailSchema.model_validate(problem)
     
-    def create_problem(self, problem_data) -> bool:
+    def create_problem(self, problem_data: ProblemCreateSchema) -> ProblemListSchema:
         """
         Create a new problem in the database. (Admin only)
         """
 
         # check if the user is an admin before creating a problem
         if self.user.role != UserRole.ADMIN:
-            HTTPException(
+            raise HTTPException(
                 status=403,
                 message="Only admins can create problems.",
                 code="FORBIDDEN"
             )
-        is_created = self.problem_repository.create(problem_data)
-        if not is_created:
-            raise HTTPException(
-                status=500,
-                message="Failed to create the problem.",
-                code="PROBLEM_CREATION_FAILED"
-            )
-        return True
+        # Create a new Problem instance from the provided data
+        problem = Problem.model_validate(problem_data)
 
-    def update_problem(self, problem_id, problem_data) -> bool:
+        created_problem = self.problem_repository.create(problem)
+        return ProblemListSchema.model_validate(created_problem)
+
+    def update_problem(self, problem_id, problem_data) -> ProblemListSchema:
         """
         Update an existing problem by its ID. (Admin only)
         """
@@ -78,16 +75,16 @@ class ProblemsService:
                 code="FORBIDDEN"
             )
         
-        is_updated = self.problem_repository.update(problem_id, problem_data)
-        if not is_updated:
+        problem = self.problem_repository.update(problem_id, problem_data)
+        if problem is None:
             raise HTTPException(
-                status=500,
-                message="Failed to update the problem.",
-                code="PROBLEM_UPDATE_FAILED"
+                status=404,
+                message="Problem doesn't exists",
+                code="NOT_FOUND"
             )
-        return True
+        return ProblemListSchema.model_validate(problem)
 
-    def delete_problem(self, problem_id) -> bool:
+    def delete_problem(self, problem_id: UUID) -> bool:
         """
         Delete a problem by its ID. (Admin only)
         """

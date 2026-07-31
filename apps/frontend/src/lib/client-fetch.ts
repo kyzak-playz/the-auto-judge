@@ -74,7 +74,7 @@ const clientFetch = async <Data>(input: RequestInfo, init?: RequestInit): Promis
       // Update the access token in the auth store
       useAuthStore.getState().setUser({
         access_token: refreshResponse.data.accessToken,
-        expiry: refreshResponse.data.expiry,
+        expires_in: refreshResponse.data.expires_in,
       });
 
       // Update the Authorization header with the new access token and retry the original request

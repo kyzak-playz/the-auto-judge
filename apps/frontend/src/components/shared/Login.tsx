@@ -11,12 +11,12 @@ import { FormState, FormError } from '@/schema/form-schema'
 
 
 const Login = ({ authMode }: AuthUIChildProps) => {
-  const [email, setEmail] = React.useState('')
+  const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState<FormError['error']>()
   // Initial form state for validation 
   const initialFormState: FormState = {
-    email: '',
+    username: '',
     password: '',
     authMode ,
     result: { success: false, error: {} }
@@ -34,10 +34,10 @@ const Login = ({ authMode }: AuthUIChildProps) => {
     }
 
     // Normalize the error shape so it matches FormError
-    const e: FormError['error'] = formState.result.error
+    const e: FormError['error'] = formState.result.error;
 
     setError({
-      email: e.email,
+      username: e.username,
       password: e.password,
       general: e.general,
     });
@@ -45,17 +45,17 @@ const Login = ({ authMode }: AuthUIChildProps) => {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <label className="text-sm text-zinc-300">Email</label>
+      <label className="text-sm text-zinc-300">Username</label>
       <input
         type="text"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
         className="rounded-md bg-zinc-800/70 px-3 py-2 text-zinc-100"
-        name='email'
+        name='username'
         required
       />
-      <p className={cn("text-sm text-red-500", !error?.email && 'hidden')}>
-        {error?.email?.map((error, index) => (
+      <p className={cn("text-sm text-red-500", !error?.username && 'hidden')}>
+        {error?.username?.map((error, index) => (
           <span key={index}>{error}<br /></span>
         ))}
       </p>

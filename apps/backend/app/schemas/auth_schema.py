@@ -12,7 +12,7 @@ from pydantic import BaseModel
 class SignInRequest(BaseModel):
     """Request model for user sign-in."""
 
-    email: str
+    username: str
     password: str
 
 
@@ -27,7 +27,7 @@ class SignInResponse(BaseModel):
 class LoginRequest(BaseModel):
     """Request model for user login."""
 
-    email: str
+    username: str
     password: str
 
 

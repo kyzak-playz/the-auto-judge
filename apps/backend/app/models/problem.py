@@ -1,13 +1,30 @@
-from datetime import datetime, timezone
-from typing import Any, ClassVar
+from datetime import datetime
+from typing import ClassVar
 from uuid import UUID, uuid4
 
 from sqlalchemy import Column, DateTime, Enum as SQLEnum, Text, func
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlmodel import Field, SQLModel
+from sqlalchemy.types import TypeDecorator
 
 from app.models.enums import ProblemDifficulty
+from app.types.test_case import TestCase
 
+class TestCaseListType(TypeDecorator):
+    impl = JSONB
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        # Python -> Database
+        return [tc.model_dump() for tc in value]
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        # Database -> Python
+        return [TestCase.model_validate(tc) for tc in value]
 
 class Problem(SQLModel, table=True):
     __tablename__: ClassVar[str] = "problem"
@@ -19,29 +36,26 @@ class Problem(SQLModel, table=True):
     title: str = Field(nullable=False)
     description: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     difficulty: ProblemDifficulty = Field(
-        default=ProblemDifficulty.MEDIUM,
         sa_column=Column(
             SQLEnum(
                 ProblemDifficulty,
                 name="problem_difficulty_enum",
                 native_enum=True,
             ),
-            nullable=False,
-            default=ProblemDifficulty.MEDIUM,
+            nullable=False
         ),
     )
-    test_case: dict[str, Any] = Field(
-        sa_column=Column(JSONB, nullable=False, default=dict)
+    test_case: list[TestCase] = Field(
+        default_factory=list,
+        sa_column=Column(TestCaseListType, nullable=False)
     )
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
         sa_column=Column(
             DateTime(timezone=True), nullable=False, server_default=func.now()
         ),
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
         sa_column=Column(
-            DateTime(timezone=True), nullable=False, server_default=func.now()
+            DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
         ),
     )

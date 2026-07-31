@@ -1,7 +1,8 @@
-from fastapi import APIRouter, status, Response, Depends
+from fastapi import APIRouter, status, Depends, Form
 from supabase import AsyncClient, AuthApiError
 from app.core.supabase_client import create_supabase_client
 from app.schemas.auth_schema import SignInRequest, SignInResponse
+from typing import Annotated
 # custom error
 from app.exceptions import HTTPException
 
@@ -9,13 +10,12 @@ router = APIRouter()
 
 
 @router.post("/signup", tags=["auth"], response_model=SignInResponse, status_code=status.HTTP_201_CREATED)
-async def sign_up(request: SignInRequest, response: Response, supabase: AsyncClient = Depends(create_supabase_client)) -> SignInResponse:
+async def sign_up(request: Annotated[SignInRequest, Form(...)], supabase: AsyncClient = Depends(create_supabase_client)) -> SignInResponse:
     """
     Create a new user account. 
     
     ### Args:
-        Request: SignInRequest - The request body containing the user's email and password.
-        Response: Response - The FastAPI Response object used to set cookies and status codes.
+        Request: SignInRequest - The request body containing the user's username and password.
         Supabase: AsyncClient - The Supabase client instance injected via dependency injection.
     
     ### Returns:
@@ -30,7 +30,7 @@ async def sign_up(request: SignInRequest, response: Response, supabase: AsyncCli
     try:
         # Create a new user account using Supabase authentication service
         auth_response = await supabase.auth.sign_up(
-            {"email": request.email, "password": request.password}
+            {"email": request.username, "password": request.password}
         )
 
         # Check if the sign-up was successful and a session was created
@@ -40,8 +40,6 @@ async def sign_up(request: SignInRequest, response: Response, supabase: AsyncCli
                 message="Signup created but no active session.",
                 code="BAD_REQUEST"
             )
-
-        response.status_code = status.HTTP_201_CREATED # Set status code to 201 Created for successful sign-up
         
         return SignInResponse(
             access_token=auth_response.session.access_token,

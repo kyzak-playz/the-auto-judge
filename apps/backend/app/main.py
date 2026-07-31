@@ -3,12 +3,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 from app.core.database import check_database_connection
-from app.middleware.authentication import AuthenticationMiddleware
 from app.exceptions import http_exception_handler, HTTPException, validation_exception_handler, fastapi_http_exception_handler
 from fastapi.exceptions import RequestValidationError, HTTPException as FastAPIHTTPException
 
 # routers must be imported after settings to ensure configuration is loaded before any API calls are made
 from app.api.v1.auth import router as auth_router
+from app.api.v1.problems import router as problems_router
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,6 @@ app = FastAPI(
     lifespan=lifespan
     )
 
-# Middlewares
-app.add_middleware(AuthenticationMiddleware)
 
 # Exception Handlers
 app.add_exception_handler(HTTPException, http_exception_handler)
@@ -44,3 +42,4 @@ app.add_exception_handler(FastAPIHTTPException, fastapi_http_exception_handler) 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 #Routers
 app.include_router(auth_router, prefix="/api/v1/auth")
+app.include_router(problems_router, prefix="/api/v1/problems")

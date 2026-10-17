@@ -49,6 +49,17 @@ def require_role(role: str) -> Callable[[Request], object]:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> SupabaseUser:
+    """
+    Get the current authenticated user based on the provided token.
+
+    Args:
+        token (str): The OAuth2 token provided in the request.
+    
+    Returns:
+        SupabaseUser: The authenticated user object.
+    Raises:
+        HTTPException: If the token is invalid, expired, or user information is incomplete.
+    """
     user = await supabase_user(token)
     if not user:
         raise HTTPException(

@@ -74,8 +74,6 @@ the-auto-judge/
 
 ## 🛠️ Getting Started
 
-> **Status:** Active development — Sprint 1
-
 This root README covers the shared project setup and local development flow. Detailed service-specific setup should live with each app so frontend and backend instructions can evolve independently.
 
 ### Prerequisites
@@ -97,8 +95,8 @@ Install these before working locally:
    cd the-auto-judge
    ```
 2. Prepare environment variables for both services:
-   - frontend variables: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY`
-   - backend variables: `DATABASE_URI`, `SUPABASE_URL`, `SUPABASE_SECRET`, `SUPABASE_ANON_KEY`, and app/runtime settings
+   - frontend variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY` and `BACKEND_URL`.
+   - backend variables: `DATABASE_URI`, `SUPABASE_URL`, `SUPABASE_SECRET`, `SUPABASE_PUBLISHABLE_KEY`, and app/runtime settings
    - local backend file: `apps/backend/.env.local` is the primary file loaded by the container and backend settings
 3. Make sure Docker is running before starting the backend stack with Docker Compose.
 4. Use app-level package managers:
@@ -106,13 +104,6 @@ Install these before working locally:
    - backend (`apps/backend`) will use `uv`
    - backend local dev helper: `make -C apps/backend dev`
 
-### Database Bootstrap Note
-
-- Initial schema bootstrap is already applied using the first Alembic migration script from `apps/backend`.
-- RLS policies are already applied in a follow-up Alembic migration.
-- All future schema updates should continue through Alembic migrations.
-- Backend startup now validates required runtime config and checks database connectivity during lifespan startup.
-- Frontend public reads use the shared Supabase client and only expose publishable-key access.
 
 ### Local Development Flow
 
@@ -125,30 +116,6 @@ Use this order when running the system locally:
 2. Start the Next.js frontend locally
 
 The Compose stack starts Redis, the FastAPI backend, and the Celery worker. It keeps backend code mounted for live reload and reads backend configuration from `apps/backend/.env.local`.
-
-## Latest updates (May 2026)
-
-- Backend: added an authentication middleware for token validation and user extraction (`apps/backend/app/middleware/authentication.py`) and centralized HTTP/validation exception handlers (`apps/backend/app/exceptions.py`). Auth routes were normalized to raise `HttpException` when appropriate.
-- Frontend: implemented authentication UI and client flows (login/signup/refresh/logout), new auth components and hooks (`apps/frontend/src/components/shared/*`, `apps/frontend/src/hooks/*`), and a small client-side proxy for API requests (`apps/frontend/src/proxy.ts`) to simplify cookie handling during local development.
-- Notes: please run linters and tests and verify end-to-end auth flows (signup/login/refresh/logout) after pulling these updates.
-
-### Full Setup References
-
-Keep detailed setup instructions inside each service directory:
-
-- Frontend setup: `apps/frontend/README.md`
-- Backend setup: `apps/backend/README.md`
-
-Those app-level docs should contain dependency installation, environment variable details, and run commands specific to their own environments.
-
-### Known Gaps
-
-- The Compose stack currently covers the backend API, Redis, and the Celery worker; the frontend remains a separate local process.
-- Full production auth hardening remains in progress; the docs should be treated as current-state guidance, not a finished release checklist.
-- Supabase Python SDK auth is currently a rough fit for a stateless backend flow.
-- Logout currently depends on creating a temporary in-memory session from provided tokens before calling signout, because the SDK signout operation uses in-memory session context.
-- A shared long-lived Supabase client is currently avoided for auth routes: user context can override client state, so a new client instance is created per request.
-- Per-request client construction is currently accepted as a practical tradeoff; performance impact should be monitored during load testing.
 
 ---
 

@@ -1,15 +1,6 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { AuthError } from "@supabase/supabase-js";
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-
-export interface AuthError extends Error {
-    status?: number;
-    code?: string
-}
+export { cn } from "cn"
 
 export function makeError(message: string, statusCode: number, code: string): AuthError {
   const err = new Error(message) as AuthError;

@@ -15,6 +15,6 @@ export const config = {
         "/dashboard",
         "/admin",
         "/profile",
-        "/problems"
+        // "/problems"  uncomment it later
     ]
 }

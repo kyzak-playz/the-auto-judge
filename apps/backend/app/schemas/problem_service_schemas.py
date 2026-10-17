@@ -3,7 +3,6 @@ from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
 from typing import Optional
 from app.models.enums import ProblemDifficulty
-from app.types.test_case import TestCase
 
 class ProblemFilterSchema(BaseModel):
     """
@@ -33,13 +32,13 @@ class ProblemBaseSchema(BaseModel):
     title: str = Field(..., description="The title of the problem")
     description: str = Field(..., description="The description of the problem")
     difficulty: ProblemDifficulty = Field(..., description="The difficulty level")
-    test_case: list[TestCase] = Field(..., description="The test cases")
+    test_case: list[dict] = Field(..., description="The test cases")
 
 class ProblemUpdateSchema(BaseModel):
     title: str | None = None
     description: str | None = None
     difficulty: ProblemDifficulty | None = None
-    test_case: list[TestCase] | None = None
+    test_case: list[dict] | None = None
 
 class ProblemListSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -58,6 +57,6 @@ class ProblemDetailSchema(BaseModel):
     title: str
     description: str
     difficulty: ProblemDifficulty
-    test_case: list[TestCase]
+    test_case: list[dict]
     created_at: datetime
     updated_at: datetime

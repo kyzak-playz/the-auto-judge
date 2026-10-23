@@ -45,14 +45,14 @@ export function PublicProblems() {
     return (
         <section
             id="problems"
-            className="mx-auto w-full max-w-6xl px-6 py-16 sm:px-8"
+            className="mx-auto w-full max-w-7xl px-5 py-16 sm:px-8"
             aria-labelledby="public-problems-title"
         >
             <div className="mb-6">
-                <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">Explore</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-400">Start here</p>
                 <h2
                     id="public-problems-title"
-                    className="mt-3 text-2xl font-semibold tracking-tight text-zinc-100 sm:text-3xl"
+                    className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl"
                 >
                     Public Problems
                 </h2>
@@ -77,11 +77,11 @@ export function PublicProblems() {
             ) : null}
 
             {!loading && !error && problems.length > 0 ? (
-                <ul className="divide-y divide-white/10 rounded-xl border border-white/10 bg-zinc-900/40">
+                <ul className="grid gap-3 md:grid-cols-2">
                     {problems.map((problem) => (
                         <li
                             key={problem.id}
-                            className="flex items-center justify-between px-4 py-4 text-sm sm:px-5"
+                            className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/70 px-5 py-5 text-sm transition hover:border-indigo-400/40 hover:bg-slate-900"
                         >
                             <span className="font-medium text-zinc-100">{problem.title}</span>
                             <span

@@ -31,7 +31,7 @@ export default function RootLayout({children,}: Readonly<{children: React.ReactN
       >
         <Navbar />
         <AuthGuard>
-          {children}
+          <div className="pt-16">{children}</div>
         </AuthGuard>
         <Footer />
       </body>

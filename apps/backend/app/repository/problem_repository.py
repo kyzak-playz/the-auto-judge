@@ -57,6 +57,8 @@ class ProblemRepository:
         problems = list(self.session.exec(query).all())
         new_problems: list[ProblemListSchema] = []
         for problem_id, title, difficulty, updated_at in problems:
+            if problem_id is None:
+                raise ValueError("Problem ID cannot be None")
             new_problems.append(
                 ProblemListSchema(
                     id=problem_id,

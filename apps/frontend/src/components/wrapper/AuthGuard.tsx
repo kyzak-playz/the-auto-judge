@@ -18,25 +18,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const authQueryParam = searchParams.get("auth");
   const shouldOpenAuthUI = authQueryParam === "true";
-  const {authOpen, user} = useAuthGuard();
+  const { authOpen, user, status } = useAuthGuard();
 
   useEffect(() => {
-    if (shouldOpenAuthUI && !authOpen) {
-      // Open overlay
+    if ( // Check if the authentication UI should be opened
+      (shouldOpenAuthUI || status === "unauthenticated") &&
+      !authOpen
+    ) {
       useAuthStore.getState().setAuthOpen(true);
 
-      // Clean up URL
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("auth");
-      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-      router.replace(newUrl); // replaces history entry, no reload
+      if (shouldOpenAuthUI) {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("auth");
+        const newUrl = params.toString()
+          ? `${pathname}?${params.toString()}`
+          : pathname;
+        router.replace(newUrl);
+      }
     }
-  }, [shouldOpenAuthUI, authOpen, pathname, router, searchParams]);
+  }, [shouldOpenAuthUI, authOpen, pathname, router, searchParams, status]);
+
+  if (status === "loading") {
+    return null; // Optionally, you can return a loading spinner or placeholder here
+  }
 
   return (
     <>
-      {children}
-      {!user && authOpen && <AuthUIComponent />}
+      {status === "authenticated" && user && children}
+      {status === "unauthenticated" && authOpen && <AuthUIComponent />}
     </>
   );
 }

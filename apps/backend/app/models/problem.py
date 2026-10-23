@@ -25,13 +25,13 @@ class Problem(SQLModel, table=True):
                 ProblemDifficulty,
                 name="problem_difficulty_enum",
                 native_enum=True,
-                values_callback=lambda x: [str(v) for v in x]
+                values_callable=lambda x: [v.value for v in x]
             ),
             nullable=False
         ),
     )
-    test_case: list[dict] = Field(
-        default_factory=list,
+    test_case: dict = Field( # changed from list[dict] to dict to match database model, as the test_case is stored as a JSONB object in the database
+        default_factory=dict,
         sa_column=Column(JSONB, nullable=False)
     )
     start_code: str = Field(
@@ -42,7 +42,7 @@ class Problem(SQLModel, table=True):
         default=None,
         sa_column=Column(
             DateTime(timezone=True), nullable=False, server_default=func.now()
-        ), # pyright: ignore[reportGeneralTypeIssues]
+        ),
     )
     updated_at: datetime = Field(
         default=None,

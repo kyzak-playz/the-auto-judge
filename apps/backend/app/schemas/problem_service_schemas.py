@@ -57,6 +57,6 @@ class ProblemDetailSchema(BaseModel):
     title: str
     description: str
     difficulty: ProblemDifficulty
-    test_case: list[dict]
+    test_case: dict # changed from list[dict] to dict to match the model
     created_at: datetime
     updated_at: datetime

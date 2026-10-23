@@ -13,23 +13,31 @@ import refreshSession from "@/actions/refresh-session";
 export function useAuthGuard() {
   const authOpen = useAuthStore((s) => s.authOpen);
   const user = useAuthStore((s) => s.user);
+  const status = useAuthStore((s) => s.status);
 
   useEffect(() => {
-    // if the authentication UI is open or if a user session already exists, do not attempt to refresh the session
-    if (authOpen || user) return;
+    if (status !== "loading") return;
 
     const getNewSession = async () => {
-      const response = await refreshSession();
-      if (response.success) {
-        useAuthStore.getState().setUser({
-          access_token: response.data.accessToken,
-          expiry: response.data.expiry,
-        });
+      try {
+        const response = await refreshSession();
+
+        if (response.success) {
+          useAuthStore.getState().setUser({
+            access_token: response.data.accessToken,
+            expires_in: response.data.expiry,
+          });
+        } else {
+          useAuthStore.getState().setStatus("unauthenticated");
+        }
+      } catch {
+        useAuthStore.getState().setStatus("unauthenticated");
+        useAuthStore.getState().setAuthOpen(true);
       }
     };
 
     getNewSession();
-  }, [authOpen, user]);
+  }, [status]);
 
-  return { authOpen, user };
+  return { authOpen, user, status };
 }

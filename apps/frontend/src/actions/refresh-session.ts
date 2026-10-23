@@ -10,7 +10,7 @@ type Success = {
     success: true;
     data: {
         accessToken: string;
-        expiry: number;
+        expires_in: number;
     }
 }
 

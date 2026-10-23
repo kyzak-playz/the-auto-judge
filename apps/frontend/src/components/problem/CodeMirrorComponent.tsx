@@ -1,26 +1,36 @@
 "use client";
 
-import { useState, useCallback } from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { python } from '@codemirror/lang-python';
+import CodeMirror from "@uiw/react-codemirror";
+import { python } from "@codemirror/lang-python";
+import { atomoneInit } from "@uiw/codemirror-theme-atomone";
 
-import { atomoneInit } from '@uiw/codemirror-theme-atomone';
+type Props = {
+  value: string;
+  onChange: (val: string) => void;
+};
 
+export default function Page({ value, onChange }: Props) {
 
-export default function Page() {
-  const [value, setValue] = useState("print('hello world!');");
-  const onChange = useCallback((val: string) => {
-    console.log('val:', val);
-    setValue(val);
-  }, []);
-  return <CodeMirror
-    theme={atomoneInit({
-      settings: {
-        caret: '#c6c6c6',
-        fontFamily: 'monospace',
-      },
-
-    })}
-
-    value={value} onChange={onChange} extensions={[python()]} height='100vh'/>;
+  return (
+    <div className="bg-[#282c34]">
+      <CodeMirror
+        className="min-h-112 text-left"
+        theme={atomoneInit({
+          settings: {
+            caret: "#c6c6c6",
+            fontFamily: "monospace",
+          },
+        })}
+        value={value}
+        onChange={onChange}
+        extensions={[python()]}
+        height="min(60vh, 42rem)"
+        basicSetup={{
+          lineNumbers: true,
+          foldGutter: true,
+          autocompletion: true,
+        }}
+      />
+    </div>
+  );
 }

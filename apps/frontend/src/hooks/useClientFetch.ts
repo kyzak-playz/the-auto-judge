@@ -17,7 +17,7 @@ type UseClientFetchReturn<Data> = {
  *   - `loading`: Loading state
  *   - `runFetch`: The fetch function
  */
-export function useClientFetch<Data>(): UseClientFetchReturn<Data> {
+export default function useClientFetch<Data>(): UseClientFetchReturn<Data> {
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<{ status: number; message: string; code?: string } | null>(null);
   const [loading, setLoading] = useState(false);

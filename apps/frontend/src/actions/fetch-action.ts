@@ -26,7 +26,10 @@ export const fetchAction = async<Data> (
       };
     }
 
-    const response = await fetch(request, init); // Make the API call with the provided request and init parameters
+    // build full bakend url for outgoing request
+    const backendUrl = `${process.env.BACKEND_URL}${request}`;
+
+    const response = await fetch(backendUrl, init); // Make the API call with the provided request and init parameters
 
     // If the response is not ok, return an error response
     if (!response.ok) {

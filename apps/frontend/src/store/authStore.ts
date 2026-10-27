@@ -21,10 +21,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user, status: "authenticated" }),
   setStatus: (status) => set({ status }),
   setAuthOpen: (open) => set({ authOpen: open }),
-  clearSession: () => set({ user: null, status: "unauthenticated", authOpen: true }),
+  clearSession: () =>
+    set({ user: null, status: "unauthenticated", authOpen: true }),
 }));
 
 export const updateUserSession = (userSession: UserSession) => {
   const { setUser } = useAuthStore.getState();
   setUser(userSession);
-}
+};

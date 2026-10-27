@@ -1,12 +1,12 @@
 from collections.abc import Callable
 from typing import Annotated
-from fastapi import Request, Depends
+
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
+
 from app.core.supabase_client import supabase_user
-from app.schemas.auth_schema import SupabaseUser
-
 from app.exceptions import HTTPException
-
+from app.schemas.auth_schema import SupabaseUser
 
 
 def require_role(role: str) -> Callable[[Request], object]:
@@ -45,16 +45,20 @@ def require_role(role: str) -> Callable[[Request], object]:
 
     return dependency
 
+
 # OAuth2 scheme for handling token-based authentication
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> SupabaseUser:
+
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+) -> SupabaseUser:
     """
     Get the current authenticated user based on the provided token.
 
     Args:
         token (str): The OAuth2 token provided in the request.
-    
+
     Returns:
         SupabaseUser: The authenticated user object.
     Raises:
@@ -74,5 +78,5 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Sup
             code="INCOMPLETE_USER_INFO",
         )
     user_obj = SupabaseUser(id=user.id, email=user.email, role=user.role)
-    
+
     return user_obj

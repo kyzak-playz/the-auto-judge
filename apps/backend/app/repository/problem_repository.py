@@ -1,18 +1,27 @@
-from sqlmodel import Session, select, desc
-from app.models.problem import Problem
-from app.schemas.problem_service_schemas import ProblemFilterSchema, ProblemUpdateSchema, ProblemListSchema, ProblemDifficulty
+from typing import cast
 from uuid import UUID
-from  typing import cast
+
+from sqlmodel import Session, desc, select
+
+from app.models.problem import Problem
+from app.schemas.problem_service_schemas import (
+    ProblemDifficulty,
+    ProblemFilterSchema,
+    ProblemListSchema,
+    ProblemUpdateSchema,
+)
+
 
 class ProblemRepository:
     """
     Repository class for managing problems in the database.
     This class provides methods to create, retrieve, update, and delete problems.
     """
+
     def __init__(self, user, session: Session):
         self.user = user
         self.session = session
-    
+
     def create(self, problem_data: Problem) -> Problem:
         """
         Create a new problem in the database.
@@ -32,19 +41,14 @@ class ProblemRepository:
         Retrieve all problems from the database based on the provided filters.
         """
 
-        filters = filters or ProblemFilterSchema() # Use default filters if none are provided
+        filters = filters or ProblemFilterSchema()  # Use default filters if none are provided
 
         # Calculate the offset for pagination
         offset = (filters.page - 1) * filters.limit
 
         # Build the query to retrieve problems with optional filtering by difficulty
         query = (
-            select(
-                Problem.id,
-                Problem.title,
-                Problem.difficulty,
-                Problem.updated_at
-                )
+            select(Problem.id, Problem.title, Problem.difficulty, Problem.updated_at)
             .order_by(desc(Problem.created_at))
             .offset(offset)
             .limit(filters.limit)

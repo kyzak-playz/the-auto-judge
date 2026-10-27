@@ -1,18 +1,24 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, status, Path
-from app.core.deps import get_current_user
-from app.exceptions import HTTPException
-from app.services.problem_service import ProblemsService
-from app.core.database import get_session
-from app.schemas.auth_schema import SupabaseUser
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, Path, status
+from sqlmodel import Session
 
+from app.core.database import get_session
+from app.core.deps import get_current_user
+from app.exceptions import HTTPException
+from app.schemas.auth_schema import SupabaseUser
+from app.services.problem_service import ProblemsService
 
 router = APIRouter()
 
+
 @router.delete("/{problem_id}", tags=["Problems"], status_code=status.HTTP_202_ACCEPTED)
-def delete_problem(user: Annotated[SupabaseUser, Depends(get_current_user)], problem_id: Annotated[UUID, Path(...)], session = Depends(get_session)):
+def delete_problem(
+    user: Annotated[SupabaseUser, Depends(get_current_user)],
+    problem_id: Annotated[UUID, Path(...)],
+    session: Annotated[Session, Depends(get_session)],
+):
     """
     Delete an existing problem.
 
@@ -39,5 +45,5 @@ def delete_problem(user: Annotated[SupabaseUser, Depends(get_current_user)], pro
         raise HTTPException(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             message=f"An error occurred while deleting the problem: {str(e)}",
-            code="PROBLEM_DELETION_ERROR"
-        )
+            code="PROBLEM_DELETION_ERROR",
+        ) from e

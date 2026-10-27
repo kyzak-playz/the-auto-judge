@@ -10,7 +10,6 @@ type Props = {
 };
 
 export default function Page({ value, onChange }: Props) {
-
   return (
     <div className="bg-[#282c34]">
       <CodeMirror

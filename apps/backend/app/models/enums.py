@@ -1,18 +1,18 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     STUDENT = "student"
     ADMIN = "admin"
 
 
-class ProblemDifficulty(str, Enum):
+class ProblemDifficulty(StrEnum):
     EASY = "easy"
     MEDIUM = "medium"
     HARD = "hard"
 
 
-class SubmissionStatus(str, Enum):
+class SubmissionStatus(StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     ACCEPTED = "accepted"

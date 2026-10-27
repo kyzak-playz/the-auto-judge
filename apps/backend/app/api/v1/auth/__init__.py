@@ -4,11 +4,12 @@ Authentication API endpoints for handling user authentication tasks.
 
 from fastapi import APIRouter
 
-# Importing routers for authentication endpoints
-from .signup import router as signup_router
 from .login import router as login_router
 from .logout import router as logout_router
 from .refresh import router as refresh_router
+
+# Importing routers for authentication endpoints
+from .signup import router as signup_router
 
 router = APIRouter()
 

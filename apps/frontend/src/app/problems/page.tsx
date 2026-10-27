@@ -33,19 +33,20 @@ export default function ProblemsPage() {
       <div className="mx-auto max-w-7xl">
         <header className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div>
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-400">
-            Problem library
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Find your next challenge.
-          </h1>
-          <p className="mt-3 max-w-xl text-slate-400">
-            Sharpen your skills with curated coding challenges, from first
-            steps to advanced algorithms.
-          </p>
+            <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-400">
+              Problem library
+            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Find your next challenge.
+            </h1>
+            <p className="mt-3 max-w-xl text-slate-400">
+              Sharpen your skills with curated coding challenges, from first
+              steps to advanced algorithms.
+            </p>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-slate-400">
-            <span className="font-semibold text-white">{problems.length}</span> challenges available
+            <span className="font-semibold text-white">{problems.length}</span>{" "}
+            challenges available
           </div>
         </header>
 

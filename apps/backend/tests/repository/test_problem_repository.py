@@ -1,8 +1,7 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import SimpleNamespace
-from uuid import UUID, uuid4
-
 from unittest.mock import MagicMock
+from uuid import uuid4
 
 from app.models.enums import ProblemDifficulty, UserRole
 from app.models.problem import Problem
@@ -23,9 +22,7 @@ class _ExecResult:
 
 
 def _make_repository(session=None) -> ProblemRepository:
-    return ProblemRepository(
-        SimpleNamespace(role=UserRole.ADMIN), session or MagicMock()
-    )
+    return ProblemRepository(SimpleNamespace(role=UserRole.ADMIN), session or MagicMock())
 
 
 def test_create_adds_problem_and_commits() -> None:
@@ -41,7 +38,7 @@ def test_create_adds_problem_and_commits() -> None:
 
 def test_get_all_applies_filters_and_maps_rows() -> None:
     session = MagicMock()
-    updated_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    updated_at = datetime(2026, 1, 1, tzinfo=UTC)
     rows = [
         (uuid4(), "Two Sum", "easy", updated_at),
     ]
@@ -104,9 +101,7 @@ def test_update_returns_false_when_problem_missing() -> None:
     repository = _make_repository()
     repository.get_by_id = MagicMock(return_value=None)
 
-    assert (
-        repository.update(uuid4(), ProblemUpdateSchema(title="Updated title")) is False
-    )
+    assert repository.update(uuid4(), ProblemUpdateSchema(title="Updated title")) is False
 
 
 def test_delete_deletes_existing_problem() -> None:

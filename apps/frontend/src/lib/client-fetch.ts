@@ -10,7 +10,10 @@ import { ApiResponse } from "@/types/response-types";
  * @param init The initialization options for the fetch function.
  * @returns (ApiResponse<Data>) A promise resolving to the API response.
  */
-const clientFetch = async <Data>(input: RequestInfo, init?: RequestInit): Promise<ApiResponse<Data>> => {
+const clientFetch = async <Data>(
+  input: RequestInfo,
+  init?: RequestInit
+): Promise<ApiResponse<Data>> => {
   const user = useAuthStore.getState().user; // use getState method to get the current value
 
   if (!user || !user.access_token) {
@@ -92,7 +95,7 @@ const clientFetch = async <Data>(input: RequestInfo, init?: RequestInit): Promis
     throw makeError(
       `Client fetch failed: ${error instanceof Error ? error.message : String(error)}`,
       500,
-      "ClientFetchError",
+      "ClientFetchError"
     );
   }
 };

@@ -17,7 +17,7 @@ export type ProblemList = {
   title: string;
   difficulty: ProblemDifficulty;
   updated_at: string;
-}
+};
 
 export type ProblemDetail = {
   id: string;
@@ -25,4 +25,4 @@ export type ProblemDetail = {
   description: string;
   difficulty: ProblemDifficulty;
   updated_at: string;
-}
+};

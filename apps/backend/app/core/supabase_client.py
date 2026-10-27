@@ -1,9 +1,12 @@
-'''
+"""
 This module provides utility functions for creating and managing a Supabase client instance.
-'''
-from app.core.config import settings
+"""
+
 from supabase import AsyncClient, create_async_client
 from supabase_auth import User
+
+from app.core.config import settings
+
 
 async def create_supabase_client() -> AsyncClient:
     """
@@ -12,8 +15,9 @@ async def create_supabase_client() -> AsyncClient:
     ### Returns:
         Client: An instance of the Supabase client configured with the URL and publishable key from settings.
     """
-    supabase =  await create_async_client(settings.supabase_url, settings.supabase_publishable_key)
+    supabase = await create_async_client(settings.supabase_url, settings.supabase_publishable_key)
     return supabase
+
 
 async def supabase_user(token: str) -> User:
     """
@@ -30,8 +34,8 @@ async def supabase_user(token: str) -> User:
     """
     supabase = await create_supabase_client()
     user_info = await supabase.auth.get_user(token)
-    
+
     if not user_info or not user_info.user:
         raise Exception("Unauthorized: Invalid or expired token")
-    
+
     return user_info.user

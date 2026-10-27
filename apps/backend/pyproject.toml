@@ -2,7 +2,7 @@
 name = "auto-judge-backend"
 version = "0.1.0"
 description = "Backend environment scaffold for The Auto Judge"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
     "fastapi",
     "uvicorn",
@@ -32,3 +32,37 @@ package = false
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
+
+[tool.ruff]
+# Target Python version matching your project
+target-version = "py314"
+line-length = 150
+
+# Exclude generated directories from linting & formatting
+exclude = [
+    "alembic/versions",
+]
+
+[tool.ruff.lint]
+# Select rule categories:
+# E/W: pycodestyle errors and warnings
+# F: Pyflakes
+# I: isort (import sorting)
+# B: flake8-bugbear (catches common FastAPI bugs like mutable default arguments)
+# UP: pyupgrade (keeps code updated to modern Python syntax)
+# FAST: FastAPI-specific checks
+# ASYNC: flake8-async (catches blocking calls and un-awaited coroutines)
+select = ["E", "W", "F", "I", "B", "UP", "FAST", "ASYNC"]
+
+ignore = ["E501"]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.format]
+# Enable standard formatting (Black-compatible style)
+quote-style = "double"
+indent-style = "space"

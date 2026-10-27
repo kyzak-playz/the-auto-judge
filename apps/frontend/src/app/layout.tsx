@@ -22,8 +22,9 @@ export const metadata: Metadata = {
   description: "Frontend for The Auto Judge",
 };
 
-export default function RootLayout({children,}: Readonly<{children: React.ReactNode}>) {
-
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
       <body

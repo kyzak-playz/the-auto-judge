@@ -1,19 +1,25 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path
-from app.core.deps import get_current_user
-from app.exceptions import HTTPException
-from app.services.problem_service import ProblemsService
-from app.schemas.problem_service_schemas import ProblemDetailSchema
-from app.core.database import get_session
-from app.schemas.auth_schema import SupabaseUser
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, Path
+from sqlmodel import Session
 
+from app.core.database import get_session
+from app.core.deps import get_current_user
+from app.exceptions import HTTPException
+from app.schemas.auth_schema import SupabaseUser
+from app.schemas.problem_service_schemas import ProblemDetailSchema
+from app.services.problem_service import ProblemsService
 
 router = APIRouter()
 
+
 @router.get("/{problem_id}", tags=["Problems"], response_model=ProblemDetailSchema)
-def get_problem_by_id(user: Annotated[SupabaseUser, Depends(get_current_user)], problem_id: Annotated[UUID, Path(...)], session = Depends(get_session)):
+def get_problem_by_id(
+    user: Annotated[SupabaseUser, Depends(get_current_user)],
+    problem_id: Annotated[UUID, Path(...)],
+    session: Annotated[Session, Depends(get_session)],
+):
     """
     Get a problem by its ID.
 
@@ -40,5 +46,5 @@ def get_problem_by_id(user: Annotated[SupabaseUser, Depends(get_current_user)], 
         raise HTTPException(
             status=500,
             message=f"An error occurred while retrieving problems: {str(e)}",
-            code="PROBLEMS_RETRIEVAL_ERROR"
-        )
+            code="PROBLEMS_RETRIEVAL_ERROR",
+        ) from e

@@ -1,11 +1,16 @@
 // Make an api call to server with credentials and return the response
 "use server";
 import { makeError } from "@/lib/utils";
-import { UserCredentials, UserResponse, UserSession, UserResponseSchema } from "@/types/authTypes";
+import {
+  UserCredentials,
+  UserResponse,
+  UserSession,
+  UserResponseSchema,
+} from "@/types/authTypes";
 import { cookies } from "next/headers";
 
 export async function authenticateUser(
-  formData: UserCredentials,
+  formData: UserCredentials
 ): Promise<UserResponse> {
   try {
     // Call the API route to authenticate the user
@@ -20,16 +25,16 @@ export async function authenticateUser(
           username: formData.username,
           password: formData.password,
         }),
-      },
+      }
     );
 
     // Check if the response is successful
     if (!response.ok) {
       type Erorr = {
-          message: string;
-          code: number;
-          type: string;
-      }
+        message: string;
+        code: number;
+        type: string;
+      };
       const error: Erorr = await response.json();
       console.log("Authentication error:", error);
       return {
@@ -39,17 +44,21 @@ export async function authenticateUser(
           code: response.status,
           type: error.type,
         },
-      }
+      };
     }
 
-    const userData: UserSession & { refresh_token: string } = await response.json();
+    const userData: UserSession & { refresh_token: string } =
+      await response.json();
     // Validate the response data against the UserResponseSchema
     const validationResult = UserResponseSchema.safeParse(userData);
     if (!validationResult.success) {
       console.error("Invalid response data:", validationResult.error);
-      throw makeError("Invalid response data from authentication API", 500, "AuthenticationError");
+      throw makeError(
+        "Invalid response data from authentication API",
+        500,
+        "AuthenticationError"
+      );
     }
-
 
     // Store the refresh token in an HTTP-only cookie
     const cookieStore = await cookies();
@@ -70,6 +79,10 @@ export async function authenticateUser(
       },
     };
   } catch (error) {
-    throw makeError(`Authentication failed: ${error instanceof Error ? error.message : String(error)}`, 500, "AuthenticationError");
+    throw makeError(
+      `Authentication failed: ${error instanceof Error ? error.message : String(error)}`,
+      500,
+      "AuthenticationError"
+    );
   }
 }

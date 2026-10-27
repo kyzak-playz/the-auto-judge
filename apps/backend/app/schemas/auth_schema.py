@@ -53,16 +53,18 @@ class LoginResponse(BaseModel):
     refresh_token: str
     expires_in: int = 60 * 3  # Access token expires in 3 minutes
 
+
 class LogoutRequest(BaseModel):
     """Request model for user logout."""
+
     Authorization: str
     refresh_token: str
+
 
 class LogoutResponse(BaseModel):
     """Response model for user logout."""
 
     message: str
-
 
 
 class userLoggedInSuccessfully(BaseModel):
@@ -71,7 +73,8 @@ class userLoggedInSuccessfully(BaseModel):
     access_token: str
     refresh_token: str
     expires_in: int = 60 * 3  # Access token expires in 3 minutes
-    user: SupabaseUser # Assuming the response includes user information, adjust as needed based on actual Supabase response structure
+    user: SupabaseUser  # Assuming the response includes user information, adjust as needed based on actual Supabase response structure
+
 
 class RefreshTokenRequest(BaseModel):
     """Request model for refreshing the access token."""

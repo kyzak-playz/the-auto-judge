@@ -45,7 +45,7 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
         error: {
           status: 401,
           message: "No refresh token found",
-          code: "NO_REFRESH_TOKEN"
+          code: "NO_REFRESH_TOKEN",
         },
       };
     }
@@ -54,12 +54,13 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
     const response = await fetch(
       `${process.env.BACKEND_URL}/api/v1/auth/refresh`,
       {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      }
+    );
 
     if (!response.ok) {
       return {
@@ -67,22 +68,22 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
         error: {
           status: response.status,
           message: "Failed to refresh token",
-          code: "REFRESH_TOKEN_FAILED"
+          code: "REFRESH_TOKEN_FAILED",
         },
       };
     }
 
     const userData: TokenPayload = await response.json();
     // set the new refresh token in the cookie
-      cookieStore.set({
-        name: "refresh_token",
-        value: userData.refresh_token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
-      });
+    cookieStore.set({
+      name: "refresh_token",
+      value: userData.refresh_token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+    });
 
     return {
       success: true,
@@ -90,13 +91,13 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
         accessToken: userData.access_token,
         expires_in: userData.expires_in,
       },
-    }
+    };
   } catch (error) {
     console.error("Refresh token error:", error);
     throw makeError(
       `Refresh token failed: ${error instanceof Error ? error.message : String(error)}`,
       500,
-      "RefreshTokenError",
+      "RefreshTokenError"
     );
   }
 }

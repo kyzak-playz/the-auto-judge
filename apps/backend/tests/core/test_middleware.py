@@ -1,15 +1,15 @@
-import json
 import asyncio
+import json
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
+from app.middleware import authentication as middleware_module
+from app.middleware.authentication import AuthenticationMiddleware
 from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 
 from app.exceptions import HTTPException
-from app.middleware import authentication as middleware_module
-from app.middleware.authentication import AuthenticationMiddleware
 
 
 def _make_request(path: str, headers: dict[str, str] | None = None) -> Request:
@@ -33,9 +33,7 @@ def _make_request(path: str, headers: dict[str, str] | None = None) -> Request:
     )
 
 
-async def _call_dispatch(
-    path: str, headers: dict[str, str] | None = None, call_next=None
-):
+async def _call_dispatch(path: str, headers: dict[str, str] | None = None, call_next=None):
     app = FastAPI()
     middleware = AuthenticationMiddleware(app)
     request = _make_request(path, headers)
@@ -82,9 +80,7 @@ def test_middleware_populates_request_state_for_valid_token(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     user = SimpleNamespace(email="student@example.com", role="student")
-    monkeypatch.setattr(
-        middleware_module, "get_current_user", AsyncMock(return_value=user)
-    )
+    monkeypatch.setattr(middleware_module, "get_current_user", AsyncMock(return_value=user))
 
     async def call_next(request: Request):
         return JSONResponse(
@@ -110,9 +106,7 @@ def test_middleware_populates_request_state_for_valid_token(
 
 
 def test_middleware_rejects_invalid_token(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        middleware_module, "get_current_user", AsyncMock(side_effect=Exception("boom"))
-    )
+    monkeypatch.setattr(middleware_module, "get_current_user", AsyncMock(side_effect=Exception("boom")))
 
     with pytest.raises(HTTPException) as exc_info:
         asyncio.run(

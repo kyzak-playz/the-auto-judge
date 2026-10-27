@@ -1,26 +1,37 @@
-from fastapi import APIRouter, status, Depends, Form
-from supabase import AsyncClient, AuthApiError
-from app.core.supabase_client import create_supabase_client
-from app.schemas.auth_schema import SignInRequest, SignInResponse
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, Form, status
+from supabase import AsyncClient, AuthApiError
+
+from app.core.supabase_client import create_supabase_client
+
 # custom error
 from app.exceptions import HTTPException
+from app.schemas.auth_schema import SignInRequest, SignInResponse
 
 router = APIRouter()
 
 
-@router.post("/signup", tags=["auth"], response_model=SignInResponse, status_code=status.HTTP_201_CREATED)
-async def sign_up(request: Annotated[SignInRequest, Form(...)], supabase: AsyncClient = Depends(create_supabase_client)) -> SignInResponse:
+@router.post(
+    "/signup",
+    tags=["auth"],
+    response_model=SignInResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def sign_up(
+    request: Annotated[SignInRequest, Form(...)],
+    supabase: Annotated[AsyncClient, Depends(create_supabase_client)],
+) -> SignInResponse:
     """
-    Create a new user account. 
-    
+    Create a new user account.
+
     ### Args:
         Request: SignInRequest - The request body containing the user's username and password.
         Supabase: AsyncClient - The Supabase client instance injected via dependency injection.
-    
+
     ### Returns:
         SignInResponse: A response model containing the access token, token type, and expiration time.
-    
+
     ### Raises:
         201: Created. User account successfully created and session established.
         400: Bad request. Signup created but no active session (e.g., email confirmation required).
@@ -29,34 +40,30 @@ async def sign_up(request: Annotated[SignInRequest, Form(...)], supabase: AsyncC
     """
     try:
         # Create a new user account using Supabase authentication service
-        auth_response = await supabase.auth.sign_up(
-            {"email": request.username, "password": request.password}
-        )
+        auth_response = await supabase.auth.sign_up({"email": request.username, "password": request.password})
 
         # Check if the sign-up was successful and a session was created
         if not auth_response.session:
             raise HTTPException(
                 status=status.HTTP_400_BAD_REQUEST,
                 message="Signup created but no active session.",
-                code="BAD_REQUEST"
+                code="BAD_REQUEST",
             )
-        
+
         return SignInResponse(
             access_token=auth_response.session.access_token,
             expires_in=auth_response.session.expires_in,
-            refresh_token=auth_response.session.refresh_token
+            refresh_token=auth_response.session.refresh_token,
         )
     # Handle specific exceptions
-    except AuthApiError as e:   # known Supabase error
+    except AuthApiError as e:  # known Supabase error
         raise HTTPException(
-            status=e.status,
-            message=e.message,
-            code=e.code or "AUTH_ERROR"
+            status=e.status, message=e.message, code=e.code or "AUTH_ERROR"
         ) from e  # Preserve original exception for debugging purposes
 
     except Exception as e:
         raise HTTPException(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             message="An error occurred during signup.",
-            code="SERVER_ERROR"
-        ) from e # Preserve original exception for debugging purposes
+            code="SERVER_ERROR",
+        ) from e  # Preserve original exception for debugging purposes

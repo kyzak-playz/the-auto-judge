@@ -11,10 +11,10 @@ export default function proxy(req: NextRequest) {
 }
 
 export const config = {
-    matcher: [
-        "/dashboard",
-        "/admin",
-        "/profile",
-        // "/problems"  uncomment it later
-    ]
-}
+  matcher: [
+    "/dashboard",
+    "/admin",
+    "/profile",
+    // "/problems"  uncomment it later
+  ],
+};

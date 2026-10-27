@@ -1,36 +1,39 @@
-from app.repository.problem_repository import ProblemRepository as problem_repository
-from app.schemas.problem_service_schemas import ProblemCreateSchema, ProblemDetailSchema, ProblemFilterSchema, ProblemListSchema
-from app.schemas.auth_schema import SupabaseUser
-from app.models.enums import UserRole
-from sqlmodel import Session
 from uuid import UUID
 
-from app.exceptions import HTTPException
+from sqlmodel import Session
 
+from app.exceptions import HTTPException
+from app.models.enums import UserRole
 from app.models.problem import Problem
+from app.repository.problem_repository import ProblemRepository as problem_repository
+from app.schemas.auth_schema import SupabaseUser
+from app.schemas.problem_service_schemas import (
+    ProblemCreateSchema,
+    ProblemDetailSchema,
+    ProblemFilterSchema,
+    ProblemListSchema,
+)
+
 
 class ProblemsService:
-    """"
+    """ "
     Service class for managing problems in the application.
     This class provides methods to create, retrieve, update, and delete problems,
     while also enforcing user role-based access control.
     """
+
     def __init__(self, user: SupabaseUser, session: Session):
         self.user = user
         self.session = session
         self.problem_repository = problem_repository(user, session)
-    
+
     def get_all_problems(self, filters: ProblemFilterSchema | None = None) -> list[ProblemListSchema]:
         """
         Retrieve all problems from the database based on the provided filters.
         """
         problems = self.problem_repository.get_all(filters)
         if problems is None or len(problems) == 0:
-            raise HTTPException(
-                status=404,
-                message="No problems found.",
-                code="PROBLEMS_NOT_FOUND"
-            )
+            raise HTTPException(status=404, message="No problems found.", code="PROBLEMS_NOT_FOUND")
         return problems
 
     def get_one_problem(self, problem_id: UUID) -> ProblemDetailSchema | HTTPException:
@@ -42,10 +45,10 @@ class ProblemsService:
             raise HTTPException(
                 status=404,
                 message=f"Problem with ID {problem_id} not found.",
-                code="PROBLEM_NOT_FOUND"
+                code="PROBLEM_NOT_FOUND",
             )
         return ProblemDetailSchema.model_validate(problem)
-    
+
     def create_problem(self, problem_data: ProblemCreateSchema) -> ProblemListSchema:
         """
         Create a new problem in the database. (Admin only)
@@ -53,11 +56,7 @@ class ProblemsService:
 
         # check if the user is an admin before creating a problem
         if self.user.role != UserRole.ADMIN:
-            raise HTTPException(
-                status=403,
-                message="Only admins can create problems.",
-                code="FORBIDDEN"
-            )
+            raise HTTPException(status=403, message="Only admins can create problems.", code="FORBIDDEN")
         # Create a new Problem instance from the provided data
         problem = Problem.model_validate(problem_data)
 
@@ -69,19 +68,11 @@ class ProblemsService:
         Update an existing problem by its ID. (Admin only)
         """
         if self.user.role != UserRole.ADMIN:
-            raise HTTPException(
-                status=403,
-                message="Only admins can update problems.",
-                code="FORBIDDEN"
-            )
-        
+            raise HTTPException(status=403, message="Only admins can update problems.", code="FORBIDDEN")
+
         problem = self.problem_repository.update(problem_id, problem_data)
         if problem is None:
-            raise HTTPException(
-                status=404,
-                message="Problem doesn't exists",
-                code="NOT_FOUND"
-            )
+            raise HTTPException(status=404, message="Problem doesn't exists", code="NOT_FOUND")
         return ProblemListSchema.model_validate(problem)
 
     def delete_problem(self, problem_id: UUID) -> bool:
@@ -89,17 +80,12 @@ class ProblemsService:
         Delete a problem by its ID. (Admin only)
         """
         if self.user.role != UserRole.ADMIN:
-            raise HTTPException(
-                status=403,
-                message="Only admins can delete problems.",
-                code="FORBIDDEN"
-            )
+            raise HTTPException(status=403, message="Only admins can delete problems.", code="FORBIDDEN")
         is_deleted = self.problem_repository.delete_by_id(problem_id)
         if not is_deleted:
             raise HTTPException(
                 status=500,
                 message="Failed to delete the problem.",
-                code="PROBLEM_DELETION_FAILED"
+                code="PROBLEM_DELETION_FAILED",
             )
         return True
-    

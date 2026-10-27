@@ -19,7 +19,11 @@ type UseClientFetchReturn<Data> = {
  */
 export default function useClientFetch<Data>(): UseClientFetchReturn<Data> {
   const [data, setData] = useState<Data | null>(null);
-  const [error, setError] = useState<{ status: number; message: string; code?: string } | null>(null);
+  const [error, setError] = useState<{
+    status: number;
+    message: string;
+    code?: string;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const runFetch = useCallback(

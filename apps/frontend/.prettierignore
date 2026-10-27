@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+package.json
+.next
+node_modules
+out
+dist

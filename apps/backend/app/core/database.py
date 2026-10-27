@@ -1,6 +1,7 @@
-from sqlalchemy.engine import Engine
-from sqlalchemy import text
 from collections.abc import Generator
+
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.core.config import settings
@@ -26,13 +27,13 @@ def _build_engine() -> Engine:
 engine = _build_engine()
 
 
-def get_session() -> Generator[Session, None, None]:
+def get_session() -> Generator[Session]:
     """
     Dependency function to provide a SQLAlchemy session for database operations.
     This function is used as a dependency in FastAPI routes to ensure that a session is created and closed properly for each request.
     Yields:
         A SQLAlchemy Session object for database operations.
-    
+
     Notes:
         - The session is created using the SQLModel engine defined in the application.
         - The session is automatically closed after the request is completed, ensuring proper resource management.

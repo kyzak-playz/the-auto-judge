@@ -1,11 +1,11 @@
 from logging.config import fileConfig
+
 from sqlalchemy import pool
 from sqlmodel import SQLModel, create_engine
 
-from alembic import context
-
-from app.core.config import settings
 import app.models  # noqa: F401
+from alembic import context
+from app.core.config import settings
 
 
 def _sqlalchemy_database_uri(raw_uri: str) -> str:
@@ -25,9 +25,7 @@ if config.config_file_name is not None:
 # Register all model metadata for autogenerate.
 target_metadata = SQLModel.metadata
 
-config.set_main_option(
-    "sqlalchemy.url", _sqlalchemy_database_uri(settings.database_uri)
-)
+config.set_main_option("sqlalchemy.url", _sqlalchemy_database_uri(settings.database_uri))
 
 
 def run_migrations_offline() -> None:
@@ -48,7 +46,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        version_table_schema="private"
+        version_table_schema="private",
     )
 
     with context.begin_transaction():
@@ -76,10 +74,10 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, 
+            connection=connection,
             target_metadata=target_metadata,
-            version_table_schema="private"
-            )
+            version_table_schema="private",
+        )
 
         with context.begin_transaction():
             context.run_migrations()

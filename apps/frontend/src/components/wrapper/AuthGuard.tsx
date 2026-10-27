@@ -21,7 +21,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { authOpen, user, status } = useAuthGuard();
 
   useEffect(() => {
-    if ( // Check if the authentication UI should be opened
+    if (
+      // Check if the authentication UI should be opened
       (shouldOpenAuthUI || status === "unauthenticated") &&
       !authOpen
     ) {

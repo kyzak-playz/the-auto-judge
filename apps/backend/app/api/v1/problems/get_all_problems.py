@@ -1,18 +1,24 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query
+from sqlmodel import Session
+
+from app.core.database import get_session
 from app.core.deps import get_current_user
 from app.exceptions import HTTPException
+from app.schemas.auth_schema import SupabaseUser
 from app.schemas.problem_service_schemas import ProblemFilterSchema, ProblemListSchema
 from app.services.problem_service import ProblemsService
-from app.core.database import get_session
-from app.schemas.auth_schema import SupabaseUser
-
-
 
 router = APIRouter()
 
+
 @router.get("/", tags=["Problems"], status_code=200, response_model=list[ProblemListSchema])
-def get_all_problems(user: Annotated[SupabaseUser, Depends(get_current_user)], filters: Annotated[ProblemFilterSchema , Query()], session = Depends(get_session)):
+def get_all_problems(
+    user: Annotated[SupabaseUser, Depends(get_current_user)],
+    filters: Annotated[ProblemFilterSchema, Query()],
+    session: Annotated[Session, Depends(get_session)],
+):
     """
     Get all problems with optional filters.
 
@@ -22,7 +28,7 @@ def get_all_problems(user: Annotated[SupabaseUser, Depends(get_current_user)], f
 
     Returns:
         List of problems matching the filters.
-    
+
     Raises:
         HTTPException: If there is an error retrieving problems.
     """
@@ -39,5 +45,5 @@ def get_all_problems(user: Annotated[SupabaseUser, Depends(get_current_user)], f
         raise HTTPException(
             status=500,
             message=f"An error occurred while retrieving problems: {str(e)}",
-            code="PROBLEMS_RETRIEVAL_ERROR"
-        )
+            code="PROBLEMS_RETRIEVAL_ERROR",
+        ) from e

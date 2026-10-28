@@ -2,7 +2,8 @@
 name = "auto-judge-backend"
 version = "0.1.0"
 description = "Backend environment scaffold for The Auto Judge"
-requires-python = ">=3.14"
+requires-python = ">=3.14, <3.15"
+requires-uv = ">=0.13.6"
 dependencies = [
     "fastapi",
     "uvicorn",
@@ -27,6 +28,7 @@ dev = [
 
 [tool.uv]
 package = false
+required-version = ">=0.13.6"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,5 +1,10 @@
 {
   "name": "frontend",
+  "engines": {
+    "node": ">=24.22.1 < 25.0.0",
+    "pnpm": ">=12.15.0"
+  },
+  "packageManager": "pnpm@12.15.0",
   "version": "0.1.0",
   "private": true,
   "scripts": {

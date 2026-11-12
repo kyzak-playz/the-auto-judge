@@ -6,7 +6,6 @@
       "version": "24.22.1",
       "pnpmVersion": "12.15.0"
     },
-    "ghcr.io/devcontainers/features/python:1": { "version": "3.14" },
     "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {},
     "ghcr.io/Stardevs/dev-container-features/redis-cli:1": {
       "version": "8.8.0",

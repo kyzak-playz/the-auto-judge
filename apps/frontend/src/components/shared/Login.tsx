@@ -6,7 +6,7 @@ import { useActionState } from "react";
 import { validateFormAction } from "@/actions/form-validation";
 import { cn } from "@/lib/utils";
 import { AuthUIChildProps } from "@/types/authTypes";
-import { updateUserSession, useAuthStore } from "@/store/authStore";
+import { updateAuthenticatedSession, useAuthStore } from "@/store/authStore";
 import { FormState, FormError } from "@/schema/form-schema";
 
 const Login = ({ authMode }: AuthUIChildProps) => {
@@ -29,7 +29,7 @@ const Login = ({ authMode }: AuthUIChildProps) => {
 
   React.useEffect(() => {
     if (formState.result.success === true) {
-      updateUserSession(formState.result.data);
+      updateAuthenticatedSession(formState.result.data);
       useAuthStore.getState().setAuthOpen(false);
       setError(undefined);
       return;

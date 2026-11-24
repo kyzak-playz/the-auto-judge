@@ -7,8 +7,6 @@ import Link from "next/link";
 import logout from "@/actions/logout";
 
 type ProfileComponentProps = {
-  name?: string;
-  email?: string;
   avatarUrl?: string | null;
   settingsHref?: string;
 };
@@ -98,11 +96,12 @@ function LogoutIcon() {
 }
 
 export default function ProfileComponent({
-  name = "Profile",
-  email = "user@example.com",
   avatarUrl = null,
   settingsHref = "/settings",
 }: ProfileComponentProps) {
+  const profile = useAuthStore((state) => state.profile);
+  const name = profile?.username ?? "Profile";
+  const email = profile?.email ?? "";
   const initials = getInitials(name);
 
   return (
@@ -157,12 +156,12 @@ export default function ProfileComponent({
 
 const LogOutButton = () => {
   const clearSession = useAuthStore((state) => state.clearSession);
-  const user = useAuthStore((state) => state.user);
+  const session = useAuthStore((state) => state.session);
 
   const handleLogout = async () => {
     // Attempt to log out via the API, but clear session locally regardless of API response to ensure user is logged out
-    if (user) {
-      const res = await logout(user.access_token);
+    if (session) {
+      const res = await logout(session.access_token);
       if (res) {
         clearSession();
       } else {

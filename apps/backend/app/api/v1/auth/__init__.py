@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from .login import router as login_router
 from .logout import router as logout_router
+from .me import router as me_router
 from .refresh import router as refresh_router
 
 # Importing routers for authentication endpoints
@@ -17,6 +18,7 @@ router = APIRouter()
 router.include_router(signup_router)
 router.include_router(login_router)
 router.include_router(logout_router)
+router.include_router(me_router)
 router.include_router(refresh_router)
 
 # Define __all__ for explicit exports when using 'from auth import *'

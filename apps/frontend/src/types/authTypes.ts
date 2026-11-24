@@ -31,37 +31,42 @@ export type UserCredentials = {
   authMode: AuthMode;
 };
 
-/**
- * UserResponse represents the data structure for the response from the server after authentication. It includes the access token, refresh token, and expiry time. This type is used to parse and validate the response from the authentication API endpoint.
- */
-export const UserResponseSchema = z.object({
-  access_token: z.jwt({ alg: "ES256" }),
-  refresh_token: z.string(),
+export const AuthTokenResponseSchema = z.object({
+  access_token: z.string().min(1),
+  refresh_token: z.string().min(1),
   expires_in: z.number(),
 });
+
+export const UserProfileSchema = z.object({
+  id: z.uuid(),
+  username: z.string(),
+  email: z.email(),
+  role: z.enum(["student", "admin", "user"]),
+});
+
+export type UserProfile = z.infer<typeof UserProfileSchema>;
+
+export type UserSession = {
+  access_token: string;
+  expires_in: number;
+};
+
+export type AuthenticatedSession = {
+  session: UserSession;
+  profile: UserProfile;
+};
 
 type UserErrorResponse = {
   success: false;
   error: {
     message: string;
     code: number;
-    type: string;
+    type?: string;
   };
 };
 
-type UserSuccessResponse = { data: z.infer<typeof UserResponseSchema> } & {
+type UserSuccessResponse = { data: AuthenticatedSession } & {
   success: true;
 };
 
-/**
- * UserResponse is a union type that can represent either a successful authentication response (UserResponse) or an error response (UserErrorResponse). This allows for proper handling of both success and error cases when making authentication requests to the server, ensuring that the frontend can respond appropriately based on the outcome of the authentication attempt.
- */
 export type UserResponse = UserSuccessResponse | UserErrorResponse;
-
-/**
- * UserSession represents the current session of the authenticated user stored in memory. It includes the access token and its expiry time. This type is used to manage the user's session state within the frontend application, allowing for features such as automatic token refresh and session expiration handling.
- */
-export type UserSession = {
-  access_token: string;
-  expires_in: number;
-};

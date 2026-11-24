@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { UserSession } from "@/types/authTypes";
+import type { AuthenticatedSession } from "@/types/authTypes";
 
 export const FormSchema = z.object({
   username: z.email({ error: "Please enter a valid email address" }).trim(),
@@ -28,7 +28,7 @@ export type FormError = {
 
 export type FormSuccess = {
   success: true;
-  data: UserSession;
+  data: AuthenticatedSession;
 };
 
 export type FormState = {

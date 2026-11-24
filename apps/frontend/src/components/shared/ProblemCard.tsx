@@ -2,10 +2,10 @@ import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ProblemList } from "@/types/problem-types";
 import Link from "next/link";
+import { CopyButton } from "@/components/shared/copyButton";
 
 const ProblemCard = ({ id, title, difficulty, updated_at }: ProblemList) => {
   return (
-    <Link href={`/problems/${id}`} className="group block">
       <Card className="flex h-full flex-col border-slate-800 bg-slate-900/70 transition-all duration-200 group-hover:-translate-y-1 group-hover:border-indigo-400/50 group-hover:bg-slate-900 group-hover:shadow-xl group-hover:shadow-indigo-950/30">
         <CardHeader>
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -21,11 +21,14 @@ const ProblemCard = ({ id, title, difficulty, updated_at }: ProblemList) => {
             >
               {difficulty}
             </Badge>
-            <span className="text-xs text-muted-foreground">#{id}</span>
+            <span className="text-xs text-muted-foreground">{id}</span>
+            <CopyButton styling="px-3 py-1.5 text-sm border rounded hover:bg-gray-100" text={id} />
           </div>
+          <Link href={`/problems/${id}`} className="hover:underline">
           <CardTitle className="line-clamp-2 text-lg text-slate-100 transition-colors group-hover:text-indigo-200">
             {title}
           </CardTitle>
+          </Link>
         </CardHeader>
 
         <CardFooter className="mt-auto flex items-center justify-between border-t border-slate-800/80 pt-4 text-sm text-slate-500">
@@ -35,7 +38,6 @@ const ProblemCard = ({ id, title, difficulty, updated_at }: ProblemList) => {
           </span>
         </CardFooter>
       </Card>
-    </Link>
   );
 };
 

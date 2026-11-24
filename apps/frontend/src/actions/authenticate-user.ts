@@ -2,10 +2,10 @@
 "use server";
 import { makeError } from "@/lib/utils";
 import {
+  AuthTokenResponseSchema,
   UserCredentials,
   UserResponse,
-  UserSession,
-  UserResponseSchema,
+  UserProfileSchema,
 } from "@/types/authTypes";
 import { cookies } from "next/headers";
 
@@ -47,24 +47,52 @@ export async function authenticateUser(
       };
     }
 
-    const userData: UserSession & { refresh_token: string } =
-      await response.json();
-    // Validate the response data against the UserResponseSchema
-    const validationResult = UserResponseSchema.safeParse(userData);
-    if (!validationResult.success) {
-      console.error("Invalid response data:", validationResult.error);
+    const tokenValidation = AuthTokenResponseSchema.safeParse(
+      await response.json()
+    );
+    if (!tokenValidation.success) {
+      console.error("Invalid response data:", tokenValidation.error);
       throw makeError(
         "Invalid response data from authentication API",
         500,
         "AuthenticationError"
       );
     }
+    const sessionData = tokenValidation.data;
+
+    const profileResponse = await fetch(
+      `${process.env.BACKEND_URL}/api/v1/auth/me`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionData.access_token}`,
+        },
+      }
+    );
+    if (!profileResponse.ok) {
+      throw makeError(
+        "Unable to load the authenticated user profile",
+        profileResponse.status,
+        "UserProfileError"
+      );
+    }
+
+    const profileValidation = UserProfileSchema.safeParse(
+      await profileResponse.json()
+    );
+    if (!profileValidation.success) {
+      console.error("Invalid user profile response:", profileValidation.error);
+      throw makeError(
+        "Invalid user profile response from authentication API",
+        500,
+        "UserProfileError"
+      );
+    }
 
     // Store the refresh token in an HTTP-only cookie
     const cookieStore = await cookies();
-    cookieStore.set("refresh_token", userData.refresh_token, {
+    cookieStore.set("refresh_token", sessionData.refresh_token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: "/", // Make the cookie accessible to the entire site
@@ -73,9 +101,11 @@ export async function authenticateUser(
     return {
       success: true,
       data: {
-        access_token: userData.access_token,
-        refresh_token: userData.refresh_token,
-        expires_in: userData.expires_in,
+        session: {
+          access_token: sessionData.access_token,
+          expires_in: sessionData.expires_in,
+        },
+        profile: profileValidation.data,
       },
     };
   } catch (error) {

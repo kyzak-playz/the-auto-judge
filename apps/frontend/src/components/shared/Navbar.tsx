@@ -14,7 +14,8 @@ const pageLinks = [
 
 export function Navbar() {
   const setAuthOpen = useAuthStore((state) => state.setAuthOpen);
-  const user = useAuthStore((state) => state.user);
+  const session = useAuthStore((state) => state.session);
+  const profile = useAuthStore((state) => state.profile);
   return (
     <header
       className="fixed inset-x-0 top-0 z-50 border-b border-slate-800/80 bg-[#080b12]/85 backdrop-blur-xl"
@@ -47,7 +48,7 @@ export function Navbar() {
         </div>
 
         <div
-          className={cn("flex items-center gap-2", { hidden: user })}
+          className={cn("flex items-center gap-2", { hidden: session })}
           aria-label="Authentication actions"
         >
           <button
@@ -62,7 +63,7 @@ export function Navbar() {
             Get Started
           </button>
         </div>
-        {user && <ProfileComponent name="Kyzak" email="kyzakplays@gmail.com" />}
+        {session && profile && <ProfileComponent />}
       </nav>
     </header>
   );

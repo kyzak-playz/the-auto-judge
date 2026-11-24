@@ -56,10 +56,7 @@ export async function validateFormAction(
       authMode: prevState.authMode,
       result: {
         success: true,
-        data: {
-          access_token: user_response.data.access_token,
-          expires_in: user_response.data.expires_in,
-        },
+        data: user_response.data,
       },
     };
   } catch (error) {

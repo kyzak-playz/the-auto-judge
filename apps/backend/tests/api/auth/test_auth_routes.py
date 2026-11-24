@@ -6,7 +6,10 @@ from fastapi.testclient import TestClient
 
 from app import main
 from app.api.v1.auth import login as login_module, logout as logout_module
+from app.core.deps import get_current_user
 from app.core.supabase_client import create_supabase_client
+from app.models.enums import UserRole
+from app.schemas.auth_schema import AuthenticatedUser
 
 
 class FakeAuthApiError(Exception):
@@ -77,6 +80,27 @@ def test_login_converts_supabase_auth_error(monkeypatch: pytest.MonkeyPatch) -> 
 
     assert response.status_code == 401
     assert response.json() == {"message": "Invalid credentials", "code": "INVALID"}
+
+
+def test_me_returns_current_user_profile() -> None:
+    current_user = AuthenticatedUser(
+        id="00000000-0000-0000-0000-000000000001",
+        username="jane",
+        email="jane@example.com",
+        role=UserRole.STUDENT,
+    )
+    main.app.dependency_overrides[get_current_user] = lambda: current_user
+
+    with TestClient(main.app) as client:
+        response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "username": "jane",
+        "email": "jane@example.com",
+        "role": "student",
+    }
 
 
 def test_signup_returns_created_session(monkeypatch: pytest.MonkeyPatch) -> None:

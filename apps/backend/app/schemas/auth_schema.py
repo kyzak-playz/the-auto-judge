@@ -6,7 +6,11 @@ This module defines the Pydantic models for authentication-related requests and 
 - Alongside there are more specific models to handle the responses from the Supabase authentication service, ensuring that the data is correctly parsed and utilized within the application and they only relate to authentication and not other functionalities of the application.
 """
 
-from pydantic import BaseModel
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict
+
+from app.models.enums import UserRole
 
 
 class SignInRequest(BaseModel):
@@ -44,6 +48,17 @@ class SupabaseUser(BaseModel):
     id: str
     email: str
     role: str
+
+
+class AuthenticatedUser(BaseModel):
+    """Application user profile loaded from the public users table."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    username: str
+    email: str
+    role: UserRole
 
 
 class LoginResponse(BaseModel):

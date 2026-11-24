@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends, Path, status
 from sqlmodel import Session
 
 from app.core.database import get_session
-from app.core.deps import get_current_user
+from app.core.deps import require_role
 from app.exceptions import HTTPException
-from app.schemas.auth_schema import SupabaseUser
+from app.models.enums import UserRole
+from app.schemas.auth_schema import AuthenticatedUser
 from app.services.problem_service import ProblemsService
 
 router = APIRouter()
@@ -15,7 +16,7 @@ router = APIRouter()
 
 @router.delete("/{problem_id}", tags=["Problems"], status_code=status.HTTP_202_ACCEPTED)
 def delete_problem(
-    user: Annotated[SupabaseUser, Depends(get_current_user)],
+    user: Annotated[AuthenticatedUser, Depends(require_role(UserRole.ADMIN))],
     problem_id: Annotated[UUID, Path(...)],
     session: Annotated[Session, Depends(get_session)],
 ):
@@ -23,7 +24,7 @@ def delete_problem(
     Delete an existing problem.
 
     Args:
-        user (SupabaseUser): The current authenticated user.
+        user (AuthenticatedUser): The current authenticated user.
         problem_id (UUID): The ID of the problem to delete.
 
     Returns:

@@ -6,7 +6,7 @@ from sqlmodel import Session
 from app.core.database import get_session
 from app.core.deps import get_current_user
 from app.exceptions import HTTPException
-from app.schemas.auth_schema import SupabaseUser
+from app.schemas.auth_schema import AuthenticatedUser
 from app.schemas.problem_service_schemas import ProblemFilterSchema, ProblemListSchema
 from app.services.problem_service import ProblemsService
 
@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/", tags=["Problems"], status_code=200, response_model=list[ProblemListSchema])
 def get_all_problems(
-    user: Annotated[SupabaseUser, Depends(get_current_user)],
+    user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     filters: Annotated[ProblemFilterSchema, Query()],
     session: Annotated[Session, Depends(get_session)],
 ):
@@ -23,7 +23,7 @@ def get_all_problems(
     Get all problems with optional filters.
 
     Args:
-        user (SupabaseUser): The current authenticated user.
+        user (AuthenticatedUser): The current authenticated user.
         filters (ProblemFilterSchema): Optional filters for querying problems.
 
     Returns:

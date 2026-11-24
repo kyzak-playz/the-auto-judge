@@ -6,7 +6,7 @@ from app.exceptions import HTTPException
 from app.models.enums import UserRole
 from app.models.problem import Problem
 from app.repository.problem_repository import ProblemRepository as problem_repository
-from app.schemas.auth_schema import SupabaseUser
+from app.schemas.auth_schema import AuthenticatedUser
 from app.schemas.problem_service_schemas import (
     ProblemCreateSchema,
     ProblemDetailSchema,
@@ -22,7 +22,7 @@ class ProblemsService:
     while also enforcing user role-based access control.
     """
 
-    def __init__(self, user: SupabaseUser, session: Session):
+    def __init__(self, user: AuthenticatedUser, session: Session):
         self.user = user
         self.session = session
         self.problem_repository = problem_repository(user, session)

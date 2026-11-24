@@ -7,7 +7,7 @@ from sqlmodel import Session
 from app.core.database import get_session
 from app.core.deps import get_current_user
 from app.exceptions import HTTPException
-from app.schemas.auth_schema import SupabaseUser
+from app.schemas.auth_schema import AuthenticatedUser
 from app.schemas.problem_service_schemas import ProblemDetailSchema
 from app.services.problem_service import ProblemsService
 
@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get("/{problem_id}", tags=["Problems"], response_model=ProblemDetailSchema)
 def get_problem_by_id(
-    user: Annotated[SupabaseUser, Depends(get_current_user)],
+    user: Annotated[AuthenticatedUser, Depends(get_current_user)],
     problem_id: Annotated[UUID, Path(...)],
     session: Annotated[Session, Depends(get_session)],
 ):
@@ -24,7 +24,7 @@ def get_problem_by_id(
     Get a problem by its ID.
 
     Args:
-        user (SupabaseUser): The current authenticated user.
+        user (AuthenticatedUser): The current authenticated user.
         problem_id (UUID): The ID of the problem to retrieve.
 
     Returns:

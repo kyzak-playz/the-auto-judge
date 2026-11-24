@@ -5,9 +5,10 @@ from fastapi import APIRouter, Body, Depends, Path, status
 from sqlmodel import Session
 
 from app.core.database import get_session
-from app.core.deps import get_current_user
+from app.core.deps import require_role
 from app.exceptions import HTTPException
-from app.schemas.auth_schema import SupabaseUser
+from app.models.enums import UserRole
+from app.schemas.auth_schema import AuthenticatedUser
 from app.schemas.problem_service_schemas import ProblemListSchema, ProblemUpdateSchema
 from app.services.problem_service import ProblemsService
 
@@ -21,7 +22,7 @@ router = APIRouter()
     response_model=ProblemListSchema,
 )
 def update_problem(
-    user: Annotated[SupabaseUser, Depends(get_current_user)],
+    user: Annotated[AuthenticatedUser, Depends(require_role(UserRole.ADMIN))],
     problem_id: Annotated[UUID, Path(...)],
     problem_data: Annotated[ProblemUpdateSchema, Body(...)],
     session: Annotated[Session, Depends(get_session)],
@@ -30,7 +31,7 @@ def update_problem(
     Update an existing problem.
 
     Args:
-        user (SupabaseUser): The current authenticated user.
+        user (AuthenticatedUser): The current authenticated user.
         problem_id (UUID): The ID of the problem to update.
         problem_data (ProblemUpdateSchema): The updated data for the problem.
 

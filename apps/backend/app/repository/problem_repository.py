@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlmodel import Session, desc, select
 
 from app.models.problem import Problem
+from app.schemas.auth_schema import AuthenticatedUser
 from app.schemas.problem_service_schemas import (
     ProblemDifficulty,
     ProblemFilterSchema,
@@ -18,7 +19,7 @@ class ProblemRepository:
     This class provides methods to create, retrieve, update, and delete problems.
     """
 
-    def __init__(self, user, session: Session):
+    def __init__(self, user: AuthenticatedUser, session: Session):
         self.user = user
         self.session = session
 

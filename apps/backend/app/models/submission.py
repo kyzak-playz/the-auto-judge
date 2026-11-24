@@ -16,7 +16,7 @@ class Submission(SQLModel, table=True):
         default_factory=uuid4,
         sa_column=Column(PGUUID(as_uuid=True), primary_key=True, nullable=False),
     )
-    user_id: UUID = Field(sa_column=Column(PGUUID(as_uuid=True), ForeignKey("user.id"), nullable=False, index=True))
+    user_id: UUID = Field(sa_column=Column(PGUUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True))
     problem_id: UUID = Field(sa_column=Column(PGUUID(as_uuid=True), ForeignKey("problem.id"), nullable=False, index=True))
     source_code: str = Field(sa_column=Column(Text, nullable=False))
     language: str = Field(nullable=False, index=True)

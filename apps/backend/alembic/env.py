@@ -27,6 +27,24 @@ target_metadata = SQLModel.metadata
 
 config.set_main_option("sqlalchemy.url", _sqlalchemy_database_uri(settings.database_uri))
 
+IGNORED_SCHEMAS = {
+    "auth",
+    "storage",
+    "realtime",
+    "vault",
+    "extensions",
+    "graphql",
+    "graphql_public",
+    "private",
+}
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    schema = getattr(object, "schema", None)
+    if schema is None and hasattr(object, "table"):
+        schema = getattr(object.table, "schema", None)
+
+    return schema not in IGNORED_SCHEMAS
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -47,6 +65,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         version_table_schema="private",
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -77,6 +96,7 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             version_table_schema="private",
+            include_object=include_object,
         )
 
         with context.begin_transaction():

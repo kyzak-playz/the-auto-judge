@@ -7,7 +7,7 @@ from app.core.supabase_client import create_supabase_client
 
 # custom error
 from app.exceptions import HTTPException
-from app.schemas.auth_schema import LoginRequest, LoginResponse
+from app.schemas.auth_schema import AuthCredentialsRequest, AuthTokenResponse
 
 router = APIRouter()
 
@@ -16,17 +16,17 @@ router = APIRouter()
     "/login",
     tags=["auth"],
     status_code=status.HTTP_200_OK,
-    response_model=LoginResponse,
+    response_model=AuthTokenResponse,
 )
 async def login(
-    request: Annotated[LoginRequest, Form()],
+    request: Annotated[AuthCredentialsRequest, Form()],
     supabase: Annotated[AsyncClient, Depends(create_supabase_client)],
 ):
     """
     Authenticate a user and return access and refresh tokens.
 
     ### Args:
-        request (LoginRequest): The login request containing the username and password.
+        request (AuthCredentialsRequest): The login request containing the username and password.
         supabase (Client): The Supabase client instance, injected via FastAPI's dependency injection system. Stored in the application state and initialized during startup.
     ### Returns:
         - Refresh and access token for the user.
@@ -47,7 +47,7 @@ async def login(
                 code="UNAUTHORIZED",
             )
 
-        return LoginResponse(
+        return AuthTokenResponse(
             access_token=auth_response.session.access_token,
             refresh_token=auth_response.session.refresh_token,
             expires_in=auth_response.session.expires_in,
@@ -57,6 +57,9 @@ async def login(
         raise HTTPException(
             status=e.status, message=e.message, code=e.code or "AUTH_ERROR"
         ) from e  # Preserve original exception for debugging purposes
+
+    except HTTPException:
+        raise
 
     except Exception as e:  # fallback for unexpected errors
         raise HTTPException(

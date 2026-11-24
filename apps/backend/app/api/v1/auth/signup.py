@@ -7,7 +7,7 @@ from app.core.supabase_client import create_supabase_client
 
 # custom error
 from app.exceptions import HTTPException
-from app.schemas.auth_schema import SignInRequest, SignInResponse
+from app.schemas.auth_schema import AuthCredentialsRequest, AuthTokenResponse
 
 router = APIRouter()
 
@@ -15,22 +15,22 @@ router = APIRouter()
 @router.post(
     "/signup",
     tags=["auth"],
-    response_model=SignInResponse,
+    response_model=AuthTokenResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def sign_up(
-    request: Annotated[SignInRequest, Form(...)],
+    request: Annotated[AuthCredentialsRequest, Form(...)],
     supabase: Annotated[AsyncClient, Depends(create_supabase_client)],
-) -> SignInResponse:
+) -> AuthTokenResponse:
     """
     Create a new user account.
 
     ### Args:
-        Request: SignInRequest - The request body containing the user's username and password.
+        Request: AuthCredentialsRequest - The request body containing the user's username and password.
         Supabase: AsyncClient - The Supabase client instance injected via dependency injection.
 
     ### Returns:
-        SignInResponse: A response model containing the access token, token type, and expiration time.
+        AuthTokenResponse: A response model containing the access token, refresh token, and expiration time.
 
     ### Raises:
         201: Created. User account successfully created and session established.
@@ -50,7 +50,7 @@ async def sign_up(
                 code="BAD_REQUEST",
             )
 
-        return SignInResponse(
+        return AuthTokenResponse(
             access_token=auth_response.session.access_token,
             expires_in=auth_response.session.expires_in,
             refresh_token=auth_response.session.refresh_token,
@@ -60,6 +60,9 @@ async def sign_up(
         raise HTTPException(
             status=e.status, message=e.message, code=e.code or "AUTH_ERROR"
         ) from e  # Preserve original exception for debugging purposes
+
+    except HTTPException:
+        raise
 
     except Exception as e:
         raise HTTPException(

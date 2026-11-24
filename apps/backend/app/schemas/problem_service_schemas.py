@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.enums import ProblemDifficulty
+from app.types.test_case import ProblemTestCases
 
 
 class ProblemFilterSchema(BaseModel):
@@ -24,14 +25,14 @@ class ProblemBaseSchema(BaseModel):
     title: str = Field(..., description="The title of the problem")
     description: str = Field(..., description="The description of the problem")
     difficulty: ProblemDifficulty = Field(..., description="The difficulty level")
-    test_case: list[dict] = Field(..., description="The test cases")
+    test_case: ProblemTestCases = Field(..., description="The test cases")
 
 
 class ProblemUpdateSchema(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    difficulty: ProblemDifficulty | None = None
-    test_case: list[dict] | None = None
+    title: str | None = Field(default=None)
+    description: str | None = Field(default=None)
+    difficulty: ProblemDifficulty | None = Field(default=None)
+    test_case: ProblemTestCases | None = Field(default=None)
 
 
 class ProblemListSchema(BaseModel):
@@ -53,6 +54,6 @@ class ProblemDetailSchema(BaseModel):
     title: str
     description: str
     difficulty: ProblemDifficulty
-    test_case: dict  # changed from list[dict] to dict to match the model
+    test_case: ProblemTestCases
     created_at: datetime
     updated_at: datetime

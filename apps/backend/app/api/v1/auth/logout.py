@@ -23,14 +23,15 @@ from app.core.supabase_client import create_supabase_client
 
 # custom erro
 from app.exceptions import HTTPException
+from app.schemas.auth_schema import LogoutRequest, LogoutResponse
 
 router = APIRouter()
 
 
-@router.post("/logout", tags=["auth"])
+@router.post("/logout", tags=["auth"], response_model=LogoutResponse)
 async def logout(
     Access_token: Annotated[str, Header(...)],
-    refresh_token: Annotated[str, Body(..., embed=True)],
+    request: Annotated[LogoutRequest, Body(...)],
     response: Response,
 ):
     """
@@ -51,10 +52,11 @@ async def logout(
     """
     try:
         supabase: AsyncClient = await create_supabase_client()
-        access_token = Access_token.removeprefix(
-            "Bearer "
-        ).strip()  # Extract the actual token value by removing the "Bearer " prefix and trimming whitespace
-        user = await supabase.auth.set_session(access_token=access_token, refresh_token=refresh_token)
+        access_token = Access_token.removeprefix("Bearer ").strip()
+        user = await supabase.auth.set_session(
+            access_token=access_token,
+            refresh_token=request.refresh_token,
+        )
         if user is None:
             raise HTTPException(
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -63,13 +65,16 @@ async def logout(
             )
         await supabase.auth.sign_out({"scope": "local"})
         response.status_code = status.HTTP_202_ACCEPTED  # Set status code to 202 Accepted for successful logout
-        return {"message": "Logout successful"}
+        return LogoutResponse(message="Logout successful")
 
     # Handle specific exceptions
     except AuthApiError as e:  # known Supabase error
         raise HTTPException(
             status=e.status, message=e.message, code=e.code or "AUTH_ERROR"
         ) from e  # Preserve original exception for debugging purposes
+
+    except HTTPException:
+        raise
 
     except Exception as e:  # fallback for unexpected errors
         raise HTTPException(

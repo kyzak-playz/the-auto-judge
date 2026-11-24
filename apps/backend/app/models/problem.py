@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlmodel import Field, SQLModel, text
 
 from app.models.enums import ProblemDifficulty
+from app.types.test_case import ProblemTestCases
 
 
 class Problem(SQLModel, table=True):
@@ -36,8 +37,13 @@ class Problem(SQLModel, table=True):
             nullable=False,
         ),
     )
-    test_case: dict = Field(  # changed from list[dict] to dict to match database model, as the test_case is stored as a JSONB object in the database
-        default_factory=dict, sa_column=Column(JSONB, nullable=False)
+    test_case: ProblemTestCases = Field(
+        default_factory=lambda: {
+            "inputs": [],
+            "fn_name": "",
+            "outputs": [],
+        },
+        sa_column=Column(JSONB, nullable=False),
     )
     start_code: str = Field(default="", sa_column=Column(Text, nullable=False))
     created_at: datetime = Field(

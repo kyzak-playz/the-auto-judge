@@ -7,7 +7,7 @@ from app.core.supabase_client import create_supabase_client
 
 # custom error
 from app.exceptions import HTTPException
-from app.schemas.auth_schema import RefreshTokenRequest, SignInResponse
+from app.schemas.auth_schema import AuthTokenResponse, RefreshTokenRequest
 
 router = APIRouter()
 
@@ -16,12 +16,12 @@ router = APIRouter()
     "/refresh",
     tags=["auth"],
     status_code=status.HTTP_200_OK,
-    response_model=SignInResponse,
+    response_model=AuthTokenResponse,
 )
 async def refresh_token(
     refresh_token: RefreshTokenRequest,
     supabase: Annotated[AsyncClient, Depends(create_supabase_client)],
-) -> SignInResponse:
+) -> AuthTokenResponse:
     """
     Refresh the access token using the refresh token stored in the HTTP-only cookie.
 
@@ -46,7 +46,7 @@ async def refresh_token(
                 code="INVALID_REFRESH_TOKEN",
             )
 
-        return SignInResponse(
+        return AuthTokenResponse(
             access_token=new_session.session.access_token,
             refresh_token=new_session.session.refresh_token,
             expires_in=new_session.session.expires_in,
@@ -54,6 +54,8 @@ async def refresh_token(
     # Handle specific authentication errors from Supabase and convert them to our custom HTTPException for consistent error handling across the application.
     except AuthApiError as e:  # Handle authentication-related errors from Supabase
         raise HTTPException(status=e.status, message=e.message, code=e.code or "AUTH_ERROR") from e
+    except HTTPException:
+        raise
     except Exception as e:  # Handle any other unexpected errors
         raise HTTPException(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,

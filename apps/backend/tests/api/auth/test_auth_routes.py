@@ -55,7 +55,7 @@ def test_login_returns_tokens(monkeypatch: pytest.MonkeyPatch) -> None:
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/login",
-            json={"email": "user@example.com", "password": "secret"},
+            data={"username": "user@example.com", "password": "secret"},
         )
 
     assert response.status_code == 200
@@ -75,11 +75,30 @@ def test_login_converts_supabase_auth_error(monkeypatch: pytest.MonkeyPatch) -> 
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/login",
-            json={"email": "user@example.com", "password": "bad"},
+            data={"username": "user@example.com", "password": "bad"},
         )
 
     assert response.status_code == 401
     assert response.json() == {"message": "Invalid credentials", "code": "INVALID"}
+
+
+def test_login_rejects_missing_session() -> None:
+    supabase = _make_supabase_client(
+        sign_in_with_password=SimpleNamespace(session=None),
+    )
+    main.app.dependency_overrides[create_supabase_client] = lambda: supabase
+
+    with TestClient(main.app) as client:
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": "user@example.com", "password": "secret"},
+        )
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "message": "Invalid email or password",
+        "code": "UNAUTHORIZED",
+    }
 
 
 def test_me_returns_current_user_profile() -> None:
@@ -118,7 +137,7 @@ def test_signup_returns_created_session(monkeypatch: pytest.MonkeyPatch) -> None
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/signup",
-            json={"email": "user@example.com", "password": "secret"},
+            data={"username": "user@example.com", "password": "secret"},
         )
 
     assert response.status_code == 201
@@ -136,7 +155,7 @@ def test_signup_raises_when_session_is_missing(monkeypatch: pytest.MonkeyPatch) 
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/signup",
-            json={"email": "user@example.com", "password": "secret"},
+            data={"username": "user@example.com", "password": "secret"},
         )
 
     assert response.status_code == 400

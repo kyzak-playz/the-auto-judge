@@ -58,7 +58,7 @@ class ProblemsService:
         if self.user.role != UserRole.ADMIN:
             raise HTTPException(status=403, message="Only admins can create problems.", code="FORBIDDEN")
         # Create a new Problem instance from the provided data
-        problem = Problem.model_validate(problem_data)
+        problem = Problem.model_validate(problem_data.model_dump())
 
         created_problem = self.problem_repository.create(problem)
         return ProblemListSchema.model_validate(created_problem)

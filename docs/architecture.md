@@ -134,8 +134,8 @@ Recommendation: validate end-to-end auth flows (signup/login/refresh/logout) aft
 | `title`       | VARCHAR                          | NOT NULL                                    |
 | `description` | TEXT                             | MARKDOWN                                    |
 | `difficulty`  | VARCHAR (`easy`/`medium`/`hard`) |                                             |
-| `test_case`   | JSONB                            | Array of `{input, expected_output}` objects |
-| `start_coode` | TEXT                             |                                             |
+| `test_case`   | JSONB                            | Object with `inputs`, `fn_name`, and `outputs` |
+| `start_code`  | TEXT                             |                                             |
 
 #### `submission`
 

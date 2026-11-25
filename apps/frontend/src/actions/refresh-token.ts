@@ -52,7 +52,7 @@ export async function performRefresh(): Promise<RefreshTokenResponse> {
 
     // Call the API route to refresh the token
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/v1/auth/refresh`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/refresh`,
       {
         method: "POST",
         headers: {

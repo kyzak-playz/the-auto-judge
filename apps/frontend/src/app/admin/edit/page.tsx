@@ -2,15 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  ArrowLeft,
-  Check,
-  Copy,
-  Eye,
-  Plus,
-  Save,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, Check, Copy, Eye, Plus, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -71,11 +63,14 @@ const difficultyStyles: Record<ProblemDifficulty, string> = {
     "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
   [ProblemDifficulty.MEDIUM]:
     "border-amber-400/30 bg-amber-400/10 text-amber-300",
-  [ProblemDifficulty.HARD]:
-    "border-rose-400/30 bg-rose-400/10 text-rose-300",
+  [ProblemDifficulty.HARD]: "border-rose-400/30 bg-rose-400/10 text-rose-300",
 };
 
-function EditProblemContent({ requestedUuid }: { requestedUuid: string | null }) {
+function EditProblemContent({
+  requestedUuid,
+}: {
+  requestedUuid: string | null;
+}) {
   const [problem, setProblem] = useState<EditableProblem>({
     ...mockProblem,
     id: requestedUuid || mockProblem.id,
@@ -117,7 +112,9 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
       testCases: [
         ...current.testCases,
         {
-          id: Math.max(0, ...current.testCases.map((testCase) => testCase.id)) + 1,
+          id:
+            Math.max(0, ...current.testCases.map((testCase) => testCase.id)) +
+            1,
           input: "",
           output: "",
           hidden: false,
@@ -193,7 +190,9 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
             <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
               Problem UUID
             </p>
-            <p className="truncate font-mono text-sm text-slate-300">{problem.id}</p>
+            <p className="truncate font-mono text-sm text-slate-300">
+              {problem.id}
+            </p>
           </div>
           <Button
             variant="outline"
@@ -219,7 +218,9 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                   </span>
                   <input
                     value={problem.title}
-                    onChange={(event) => updateProblem("title", event.target.value)}
+                    onChange={(event) =>
+                      updateProblem("title", event.target.value)
+                    }
                     className="h-11 w-full rounded-lg border border-slate-700 bg-slate-950 px-3.5 text-sm text-white outline-none transition focus:border-indigo-500 focus:ring-3 focus:ring-indigo-500/15"
                   />
                 </label>
@@ -229,7 +230,9 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                     <span className="text-sm font-medium text-slate-300">
                       Description
                     </span>
-                    <span className="text-xs text-slate-500">Markdown supported</span>
+                    <span className="text-xs text-slate-500">
+                      Markdown supported
+                    </span>
                   </div>
                   {activePreview ? (
                     <div className="min-h-72 whitespace-pre-wrap rounded-lg border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-300">
@@ -253,7 +256,8 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                 <div>
                   <h2 className="font-semibold text-white">Test cases</h2>
                   <p className="mt-1 text-xs text-slate-500">
-                    {visibleTestCases} public · {problem.testCases.length - visibleTestCases} hidden
+                    {visibleTestCases} public ·{" "}
+                    {problem.testCases.length - visibleTestCases} hidden
                   </p>
                 </div>
                 <Button
@@ -305,7 +309,11 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                         <textarea
                           value={testCase.input}
                           onChange={(event) =>
-                            updateTestCase(testCase.id, "input", event.target.value)
+                            updateTestCase(
+                              testCase.id,
+                              "input",
+                              event.target.value
+                            )
                           }
                           className="min-h-28 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 p-3 font-mono text-sm text-slate-200 outline-none focus:border-indigo-500"
                           placeholder="Enter test input"
@@ -318,7 +326,11 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                         <textarea
                           value={testCase.output}
                           onChange={(event) =>
-                            updateTestCase(testCase.id, "output", event.target.value)
+                            updateTestCase(
+                              testCase.id,
+                              "output",
+                              event.target.value
+                            )
                           }
                           className="min-h-28 w-full resize-y rounded-lg border border-slate-700 bg-slate-950 p-3 font-mono text-sm text-slate-200 outline-none focus:border-indigo-500"
                           placeholder="Enter expected output"
@@ -331,7 +343,11 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                         type="checkbox"
                         checked={testCase.hidden}
                         onChange={(event) =>
-                          updateTestCase(testCase.id, "hidden", event.target.checked)
+                          updateTestCase(
+                            testCase.id,
+                            "hidden",
+                            event.target.checked
+                          )
                         }
                         className="size-4 accent-indigo-500"
                       />
@@ -373,7 +389,9 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                   </span>
                   <select
                     value={problem.language}
-                    onChange={(event) => updateProblem("language", event.target.value)}
+                    onChange={(event) =>
+                      updateProblem("language", event.target.value)
+                    }
                     className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-200 outline-none focus:border-indigo-500"
                   >
                     <option>Python</option>
@@ -415,7 +433,10 @@ function EditProblemContent({ requestedUuid }: { requestedUuid: string | null })
                         step="16"
                         value={problem.memoryLimit}
                         onChange={(event) =>
-                          updateProblem("memoryLimit", Number(event.target.value))
+                          updateProblem(
+                            "memoryLimit",
+                            Number(event.target.value)
+                          )
                         }
                         className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 pr-10 text-sm text-slate-200 outline-none focus:border-indigo-500"
                       />
@@ -477,5 +498,10 @@ function EditProblemRoute() {
   const searchParams = useSearchParams();
   const requestedUuid = searchParams.get("uuid");
 
-  return <EditProblemContent key={requestedUuid || "default"} requestedUuid={requestedUuid} />;
+  return (
+    <EditProblemContent
+      key={requestedUuid || "default"}
+      requestedUuid={requestedUuid}
+    />
+  );
 }

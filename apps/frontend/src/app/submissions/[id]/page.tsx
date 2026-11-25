@@ -1,51 +1,58 @@
+"use client";
+
+import { use, useEffect } from "react";
 import Link from "next/link";
-import { CheckCircle2, Clock3, Code2, Sparkles, XCircle } from "lucide-react";
+import { CheckCircle2, Clock3, Code2, Info, XCircle } from "lucide-react";
+
+import useClientFetch from "@/hooks/useClientFetch";
+import type { SubmissionDetail } from "@/types/submission-types";
 
 type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-const submittedCode = `def two_sum(numbers, target):
-    seen = {}
+export default function SubmissionResultPage({ params }: PageProps) {
+  const { id } = use(params);
+  const {
+    data: result,
+    error,
+    loading,
+    runFetch,
+  } = useClientFetch<SubmissionDetail>();
 
-    for index, number in enumerate(numbers):
-        complement = target - number
-        if complement in seen:
-            return [seen[complement], index]
-        seen[number] = index
+  useEffect(() => {
+    void runFetch(`/api/v1/submission/${encodeURIComponent(id)}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+  }, [id, runFetch]);
 
-    return []`;
+  if (loading) {
+    return (
+      <main className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 text-slate-400">
+        Fetching submission result...
+      </main>
+    );
+  }
 
-const tests = [
-  {
-    name: "Basic pair",
-    input: "[2, 7, 11, 15], target = 9",
-    expected: "[0, 1]",
-    actual: "[0, 1]",
-    passed: true,
-    time: "0.42 ms",
-  },
-  {
-    name: "Duplicate values",
-    input: "[3, 3], target = 6",
-    expected: "[0, 1]",
-    actual: "[0, 1]",
-    passed: true,
-    time: "0.18 ms",
-  },
-  {
-    name: "No matching pair",
-    input: "[1, 2, 3], target = 10",
-    expected: "[]",
-    actual: "[]",
-    passed: true,
-    time: "0.15 ms",
-  },
-];
+  if (error) {
+    return (
+      <main className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 text-center text-rose-400">
+        Could not load submission result: {error.message}
+      </main>
+    );
+  }
 
-export default async function SubmissionResultPage({ params }: PageProps) {
-  const { id } = await params;
-  const passedTests = tests.filter((test) => test.passed).length;
+  if (!result) {
+    return (
+      <main className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 text-center text-slate-400">
+        Submission result not found.
+      </main>
+    );
+  }
+
+  const accepted = result.status === "accepted";
+  const passedTests = result.tests.filter((test) => test.passed).length;
 
   return (
     <main className="min-h-[calc(100vh-8rem)] bg-slate-950 px-4 py-8 text-slate-100 sm:px-6 lg:px-10">
@@ -53,34 +60,52 @@ export default async function SubmissionResultPage({ params }: PageProps) {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <Link
-              href="/problems"
+              href={`/problems/${encodeURIComponent(result.problem_id)}`}
               className="text-sm font-medium text-slate-400 transition-colors hover:text-cyan-400"
             >
-              ← Back to problems
+              ← Back to problem
             </Link>
             <p className="mt-5 text-sm font-semibold uppercase tracking-[0.2em] text-cyan-400">
               Submission result
             </p>
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Two Sum
+              {result.problem_title}
             </h1>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-right">
             <p className="text-xs uppercase tracking-wide text-slate-500">
               Submission ID
             </p>
-            <p className="mt-1 font-mono text-sm text-slate-300">{id}</p>
+            <p className="mt-1 font-mono text-sm text-slate-300">
+              {result.submission_id}
+            </p>
           </div>
         </div>
 
         <section className="mb-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5">
+          <div
+            className={`rounded-2xl border p-5 ${
+              accepted
+                ? "border-emerald-500/20 bg-emerald-500/10"
+                : "border-rose-500/20 bg-rose-500/10"
+            }`}
+          >
             <div className="flex items-center gap-3">
-              <CheckCircle2 className="size-5 text-emerald-400" />
-              <p className="text-sm font-medium text-emerald-300">Accepted</p>
+              {accepted ? (
+                <CheckCircle2 className="size-5 text-emerald-400" />
+              ) : (
+                <XCircle className="size-5 text-rose-400" />
+              )}
+              <p
+                className={`text-sm font-medium ${
+                  accepted ? "text-emerald-300" : "text-rose-300"
+                }`}
+              >
+                {result.status.replaceAll("_", " ")}
+              </p>
             </div>
             <p className="mt-3 text-2xl font-bold text-white">
-              {passedTests}/{tests.length} tests passed
+              {passedTests}/{result.total_tests} tests passed
             </p>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
@@ -90,14 +115,18 @@ export default async function SubmissionResultPage({ params }: PageProps) {
                 Execution time
               </p>
             </div>
-            <p className="mt-3 text-2xl font-bold text-white">0.42 ms</p>
+            <p className="mt-3 text-2xl font-bold text-white">
+              {result.execution_time_ms} ms
+            </p>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <div className="flex items-center gap-3">
               <Code2 className="size-5 text-violet-400" />
               <p className="text-sm font-medium text-slate-300">Language</p>
             </div>
-            <p className="mt-3 text-2xl font-bold text-white">Python 3</p>
+            <p className="mt-3 text-2xl font-bold text-white">
+              {result.language}
+            </p>
           </div>
         </section>
 
@@ -107,42 +136,33 @@ export default async function SubmissionResultPage({ params }: PageProps) {
               <div>
                 <h2 className="font-semibold text-white">Submitted code</h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  Code submitted for this attempt
+                  Mock submission details returned by the backend
                 </p>
               </div>
               <span className="rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-400">
-                Python
+                {result.language}
               </span>
             </div>
             <pre className="min-h-80 overflow-x-auto bg-slate-950 p-5 text-sm leading-6 text-slate-300">
-              <code>{submittedCode}</code>
+              <code>{result.code}</code>
             </pre>
           </section>
 
           <section className="rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
             <div className="mb-5 flex items-center gap-3">
-              <Sparkles className="size-5 text-amber-400" />
+              <Info className="size-5 text-amber-400" />
               <div>
-                <h2 className="font-semibold text-white">AI summary</h2>
+                <h2 className="font-semibold text-white">Mock evaluation</h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  Automated feedback for this submission
+                  Placeholder feedback for this submission
                 </p>
               </div>
             </div>
             <p className="leading-7 text-slate-300">
-              Your solution correctly uses a hash map to find the required
-              complement in one pass. It handles duplicate values and cases
-              where no pair exists.
+              This result is served from predefined backend mock data. The real
+              judge can replace this response when submission persistence and
+              execution are connected.
             </p>
-            <div className="mt-5 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-cyan-300">
-                Remark
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Good work. The approach has an estimated O(n) time complexity
-                and O(n) additional space complexity.
-              </p>
-            </div>
           </section>
         </div>
 
@@ -150,11 +170,11 @@ export default async function SubmissionResultPage({ params }: PageProps) {
           <div className="border-b border-slate-800 px-5 py-4">
             <h2 className="font-semibold text-white">Test results</h2>
             <p className="mt-1 text-xs text-slate-500">
-              Results from the visible test cases
+              Mock results fetched from the submission detail endpoint
             </p>
           </div>
           <div className="divide-y divide-slate-800">
-            {tests.map((test) => (
+            {result.tests.map((test) => (
               <div
                 key={test.name}
                 className="grid gap-4 px-5 py-5 md:grid-cols-[1.2fr_1fr_1fr_auto] md:items-center"

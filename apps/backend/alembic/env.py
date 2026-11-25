@@ -46,6 +46,7 @@ def include_object(object, name, type_, reflected, compare_to):
 
     return schema not in IGNORED_SCHEMAS
 
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 

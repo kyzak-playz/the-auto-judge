@@ -11,7 +11,6 @@ from app.schemas.problem_service_schemas import (
     ProblemUpdateSchema,
 )
 
-
 TEST_CASE = {
     "inputs": [['"1 + 1"']],
     "fn_name": "calculate",

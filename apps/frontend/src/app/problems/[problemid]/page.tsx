@@ -1,17 +1,76 @@
 "use client";
 
-import { use, useEffect, useState, useCallback } from "react";
+import { use, useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import { CheckCircle2, LoaderCircle, TriangleAlert } from "lucide-react";
 import CodeMirrorComponent from "@/components/problem/CodeMirrorComponent";
 import { Button } from "@/components/ui/button";
 import { ProblemDetail } from "@/types/problem-types";
 import useClientFetch from "@/hooks/useClientFetch";
-import { submitCode } from "@/actions/submit-code";
+import clientFetch from "@/lib/client-fetch";
+import { getSubmissionSocketUrl } from "@/actions/get-submission-socket-url";
+import type {
+  SubmissionResult,
+  SubmissionSocketUpdate,
+  SubmissionStartResponse,
+} from "@/types/submission-types";
 
 type PageProps = {
   params: Promise<{ problemid: string }>;
 };
+
+function isSubmissionResult(value: unknown): value is SubmissionResult {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const result = value as Record<string, unknown>;
+  return (
+    typeof result.submission_id === "string" &&
+    result.status === "accepted" &&
+    typeof result.passed_tests === "number" &&
+    typeof result.total_tests === "number" &&
+    typeof result.execution_time_ms === "number" &&
+    Array.isArray(result.tests) &&
+    result.tests.every((test: unknown) => {
+      if (!test || typeof test !== "object") {
+        return false;
+      }
+      const testResult = test as Record<string, unknown>;
+      return (
+        typeof testResult.name === "string" &&
+        typeof testResult.input === "string" &&
+        typeof testResult.expected === "string" &&
+        typeof testResult.actual === "string" &&
+        typeof testResult.passed === "boolean" &&
+        typeof testResult.time === "string"
+      );
+    })
+  );
+}
+
+function isSubmissionSocketUpdate(
+  value: unknown
+): value is SubmissionSocketUpdate {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const update = value as Record<string, unknown>;
+  if (update.status === "running") {
+    return (
+      typeof update.progress === "number" && typeof update.message === "string"
+    );
+  }
+
+  return (
+    update.status === "completed" &&
+    update.progress === 100 &&
+    isSubmissionResult(update.result)
+  );
+}
 
 const init: RequestInit = {
   method: "GET",
@@ -20,12 +79,19 @@ const init: RequestInit = {
   },
 };
 
+type SubmissionStatus = "idle" | "starting" | "running" | "error";
+
 const Page = ({ params }: PageProps) => {
-  // Create state for submit data
+  const router = useRouter();
   const [code, setCode] = useState<string>(
     "# Write your solution here\nprint('Hello, World!')"
   );
-  // on change submit functon
+  const [submissionStatus, setSubmissionStatus] =
+    useState<SubmissionStatus>("idle");
+  const [submissionProgress, setSubmissionProgress] = useState(0);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const socketRef = useRef<WebSocket | null>(null);
+
   const onCodeChange = useCallback((val: string) => {
     setCode(val);
   }, []);
@@ -36,6 +102,13 @@ const Page = ({ params }: PageProps) => {
   useEffect(() => {
     void runFetch(`/api/v1/problems/${encodeURIComponent(problemid)}`, init);
   }, [problemid, runFetch]);
+
+  useEffect(
+    () => () => {
+      socketRef.current?.close();
+    },
+    []
+  );
 
   if (loading) {
     return (
@@ -61,13 +134,104 @@ const Page = ({ params }: PageProps) => {
     );
   }
 
-  // Function to handle code submission
   const handleSubmit = async () => {
+    if (submissionStatus === "starting" || submissionStatus === "running") {
+      return;
+    }
+
+    setSubmissionStatus("starting");
+    setSubmissionProgress(0);
+    setSubmissionError(null);
+
     try {
-      await submitCode(code);
-      console.log("Code submitted successfully");
+      const response = await clientFetch<SubmissionStartResponse>(
+        "/api/v1/submission/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            problem_id: data.id,
+            code,
+            language: "python",
+          }),
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error.message);
+      }
+
+      const submissionId = response.data.submission_id;
+      const socketUrl = await getSubmissionSocketUrl(submissionId);
+      const result = await new Promise<SubmissionResult>((resolve, reject) => {
+        const socket = new WebSocket(socketUrl);
+        socketRef.current = socket;
+        let completed = false;
+
+        const timeout = window.setTimeout(() => {
+          socket.close();
+          reject(new Error("Submission timed out while waiting for results."));
+        }, 15_000);
+
+        socket.onopen = () => {
+          setSubmissionStatus("running");
+        };
+        socket.onmessage = (event: MessageEvent<string>) => {
+          let update: unknown;
+          try {
+            update = JSON.parse(event.data) as unknown;
+          } catch {
+            window.clearTimeout(timeout);
+            socket.close();
+            reject(new Error("Received an invalid submission update."));
+            return;
+          }
+
+          if (!isSubmissionSocketUpdate(update)) {
+            window.clearTimeout(timeout);
+            socket.close();
+            reject(new Error("Received an invalid submission update."));
+            return;
+          }
+
+          if (update.status === "running") {
+            setSubmissionProgress(update.progress);
+            return;
+          }
+
+          if (update.result.submission_id !== submissionId) {
+            window.clearTimeout(timeout);
+            socket.close();
+            reject(new Error("Received an unexpected submission result."));
+            return;
+          }
+
+          completed = true;
+          window.clearTimeout(timeout);
+          setSubmissionProgress(100);
+          socket.close();
+          resolve(update.result);
+        };
+        socket.onerror = () => {
+          window.clearTimeout(timeout);
+          reject(new Error("Could not connect to the submission socket."));
+        };
+        socket.onclose = () => {
+          if (!completed) {
+            window.clearTimeout(timeout);
+            reject(
+              new Error("Submission socket closed before returning a result.")
+            );
+          }
+        };
+      });
+
+      router.push(`/submissions/${encodeURIComponent(result.submission_id)}`);
     } catch (error) {
-      console.error("Error submitting code:", error);
+      setSubmissionStatus("error");
+      setSubmissionError(
+        error instanceof Error ? error.message : "Unable to submit solution."
+      );
     }
   };
 
@@ -128,15 +292,45 @@ const Page = ({ params }: PageProps) => {
               </span>
             </div>
             <CodeMirrorComponent value={code} onChange={onCodeChange} />
-            <div className="flex items-center justify-between border-t border-slate-800 px-5 py-4">
-              <p className="text-xs text-slate-500">
-                Your code will be evaluated against hidden test cases.
-              </p>
+            <div className="flex flex-col gap-3 border-t border-slate-800 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                {submissionStatus === "starting" ||
+                submissionStatus === "running" ? (
+                  <div className="flex items-center gap-2 text-sm text-cyan-300">
+                    <LoaderCircle className="size-4 animate-spin" />
+                    <span>
+                      {submissionStatus === "starting"
+                        ? "Starting submission..."
+                        : `Running tests... ${submissionProgress}%`}
+                    </span>
+                  </div>
+                ) : submissionStatus === "error" ? (
+                  <p className="flex items-center gap-2 text-sm text-rose-400">
+                    <TriangleAlert className="size-4 shrink-0" />
+                    {submissionError}
+                  </p>
+                ) : (
+                  <p className="flex items-center gap-2 text-xs text-slate-500">
+                    <CheckCircle2 className="size-4 text-slate-600" />
+                    Your code will be evaluated against the test cases.
+                  </p>
+                )}
+              </div>
               <Button
-                onClick={handleSubmit}
+                type="button"
+                onClick={() => void handleSubmit()}
+                disabled={
+                  submissionStatus === "starting" ||
+                  submissionStatus === "running"
+                }
                 className="bg-cyan-500 font-semibold text-slate-950 hover:bg-cyan-400"
               >
-                Submit solution
+                {submissionStatus === "starting" ||
+                submissionStatus === "running"
+                  ? "Submitting..."
+                  : submissionStatus === "error"
+                    ? "Retry submission"
+                    : "Submit solution"}
               </Button>
             </div>
           </section>

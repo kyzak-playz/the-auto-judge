@@ -31,7 +31,7 @@ Create `apps/frontend/.env.local` with only public Supabase values:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY=sb_publishable_<your_key>
-BACKEND_URL=http://<domain>.<TLD>
+NEXT_PUBLIC_BACKEND_URL=http://<domain>.<TLD>
 ```
 
 Keep all secret/service-role keys in backend-only environment files.

@@ -7,7 +7,7 @@ import { validateFormAction } from "@/actions/form-validation";
 import { cn } from "@/lib/utils";
 import { AuthUIChildProps } from "@/types/authTypes";
 import { updateAuthenticatedSession, useAuthStore } from "@/store/authStore";
-import { FormError, FormState } from "@/schema/form-schema";
+import { FormState } from "@/schema/form-schema";
 
 /**
  * SignIn component provides a form for users to create an account.
@@ -17,7 +17,6 @@ import { FormError, FormState } from "@/schema/form-schema";
 const SignIn = ({ authMode }: AuthUIChildProps) => {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState<FormError["error"]>();
 
   const initialFormState: FormState = {
     username: "",
@@ -37,19 +36,11 @@ const SignIn = ({ authMode }: AuthUIChildProps) => {
     if (formState.result.success === true) {
       updateAuthenticatedSession(formState.result.data);
       useAuthStore.getState().setAuthOpen(false);
-      setError(undefined);
-      return;
     }
+  }, [formState]);
 
-    // Normalize the error shape so it matches FormError
-    const e: FormError["error"] = formState.result.error;
-
-    setError({
-      username: e.username,
-      password: e.password,
-      general: e.general,
-    });
-  }, [formState, isPending]);
+  const error =
+    formState.result.success === true ? undefined : formState.result.error;
 
   return (
     <form action={formAction} className="flex flex-col gap-4">

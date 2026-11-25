@@ -95,7 +95,7 @@ Install these before working locally:
    cd the-auto-judge
    ```
 2. Prepare environment variables for both services:
-   - frontend variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY` and `BACKEND_URL`.
+   - frontend variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_SB_PUBLISHABLE_KEY` and `NEXT_PUBLIC_BACKEND_URL`.
    - backend variables: `DATABASE_URI`, `SUPABASE_URL`, `SUPABASE_SECRET`, `SUPABASE_PUBLISHABLE_KEY`, and app/runtime settings
    - local backend file: `apps/backend/.env.local` is the primary file loaded by the container and backend settings
 3. Make sure Docker is running before starting the backend stack with Docker Compose.
@@ -103,7 +103,6 @@ Install these before working locally:
    - frontend (`apps/frontend`) uses `pnpm`
    - backend (`apps/backend`) will use `uv`
    - backend local dev helper: `make -C apps/backend dev`
-
 
 ### Local Development Flow
 

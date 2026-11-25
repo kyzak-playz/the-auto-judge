@@ -15,7 +15,7 @@ export async function authenticateUser(
   try {
     // Call the API route to authenticate the user
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/v1/auth/${formData.authMode}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/${formData.authMode}`,
       {
         method: "POST",
         headers: {
@@ -61,7 +61,7 @@ export async function authenticateUser(
     const sessionData = tokenValidation.data;
 
     const profileResponse = await fetch(
-      `${process.env.BACKEND_URL}/api/v1/auth/me`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/me`,
       {
         headers: {
           Authorization: `Bearer ${sessionData.access_token}`,

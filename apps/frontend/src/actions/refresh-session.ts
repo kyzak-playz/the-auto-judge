@@ -46,7 +46,7 @@ const refreshSession = async (): Promise<RefreshSessionResponse> => {
   // Refresh successful, update session with new token
   const newSession = response.data;
   const profileResponse = await fetch(
-    `${process.env.BACKEND_URL}/api/v1/auth/me`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/me`,
     {
       headers: {
         Authorization: `Bearer ${newSession.accessToken}`,

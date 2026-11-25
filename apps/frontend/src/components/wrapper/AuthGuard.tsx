@@ -30,8 +30,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* Always render the page so public routes & 404s never disappear */}
-      {children}
+      {status === "loading" ? (
+        <main className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 text-slate-400">
+          Restoring session...
+        </main>
+      ) : (
+        children
+      )}
 
       {/* Render Auth UI as an overlay/modal whenever authOpen is true */}
       {authOpen && status !== "authenticated" && <AuthUIComponent />}

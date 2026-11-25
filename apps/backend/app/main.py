@@ -10,6 +10,7 @@ from fastapi.exceptions import (
 # routers must be imported after settings to ensure configuration is loaded before any API calls are made
 from app.api.v1.auth import router as auth_router
 from app.api.v1.problems import router as problems_router
+from app.api.v1.submission import router as submission_router
 from app.core.config import settings
 from app.core.database import check_database_connection
 from app.exceptions import (
@@ -50,3 +51,4 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 # Routers
 app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(problems_router, prefix="/api/v1/problems")
+app.include_router(submission_router, prefix="/api/v1/submission")

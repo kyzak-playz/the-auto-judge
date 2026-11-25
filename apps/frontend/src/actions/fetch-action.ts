@@ -27,7 +27,7 @@ export const fetchAction = async <Data>(
     }
 
     // build full bakend url for outgoing request
-    const backendUrl = `${process.env.BACKEND_URL}${request}`;
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}${request}`;
 
     const response = await fetch(backendUrl, init); // Make the API call with the provided request and init parameters
 

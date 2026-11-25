@@ -30,7 +30,7 @@ class User(SQLModel, table=True):
             ),
             nullable=False,
             default=UserRole.USER,
-            server_default=UserRole.USER.value
+            server_default=UserRole.USER.value,
         ),
     )
     created_at: datetime = Field(
@@ -41,7 +41,6 @@ class User(SQLModel, table=True):
         default_factory=lambda: datetime.now(UTC),
         sa_column=Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()),
     )
-
 
 
 # Stub table so SQLAlchemy/Alembic can resolve ForeignKey("auth.users.id")

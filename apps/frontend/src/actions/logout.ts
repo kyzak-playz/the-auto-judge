@@ -14,7 +14,7 @@ const logout = async (access_token: string): Promise<boolean> => {
   try {
     // Call the API route to logout the user
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/v1/auth/logout`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/logout`,
       {
         method: "POST",
         headers: {

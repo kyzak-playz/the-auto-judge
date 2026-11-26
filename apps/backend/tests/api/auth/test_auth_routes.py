@@ -5,9 +5,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import main
-from app.api.v1.auth import login as login_module
-from app.api.v1.auth import logout as logout_module
+from app.api.v1.auth import login as login_module, logout as logout_module
+from app.core.deps import get_current_user
 from app.core.supabase_client import create_supabase_client
+from app.models.enums import UserRole
+from app.schemas.auth_schema import AuthenticatedUser
 
 
 class FakeAuthApiError(Exception):
@@ -18,9 +20,7 @@ class FakeAuthApiError(Exception):
         self.code = code
 
 
-def _make_session(
-    access_token: str = "access", refresh_token: str = "refresh", expires_in: int = 180
-):
+def _make_session(access_token: str = "access", refresh_token: str = "refresh", expires_in: int = 180):
     return SimpleNamespace(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -30,13 +30,9 @@ def _make_session(
 
 def _make_supabase_client(**auth_method_returns):
     auth = SimpleNamespace(
-        sign_in_with_password=AsyncMock(
-            return_value=auth_method_returns.get("sign_in_with_password")
-        ),
+        sign_in_with_password=AsyncMock(return_value=auth_method_returns.get("sign_in_with_password")),
         sign_up=AsyncMock(return_value=auth_method_returns.get("sign_up")),
-        refresh_session=AsyncMock(
-            return_value=auth_method_returns.get("refresh_session")
-        ),
+        refresh_session=AsyncMock(return_value=auth_method_returns.get("refresh_session")),
         set_session=AsyncMock(return_value=auth_method_returns.get("set_session")),
         sign_out=AsyncMock(return_value=None),
     )
@@ -59,7 +55,7 @@ def test_login_returns_tokens(monkeypatch: pytest.MonkeyPatch) -> None:
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/login",
-            json={"email": "user@example.com", "password": "secret"},
+            data={"username": "user@example.com", "password": "secret"},
         )
 
     assert response.status_code == 200
@@ -73,19 +69,57 @@ def test_login_returns_tokens(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_login_converts_supabase_auth_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(login_module, "AuthApiError", FakeAuthApiError)
     supabase = _make_supabase_client()
-    supabase.auth.sign_in_with_password.side_effect = FakeAuthApiError(
-        401, "Invalid credentials", "INVALID"
+    supabase.auth.sign_in_with_password.side_effect = FakeAuthApiError(401, "Invalid credentials", "INVALID")
+    main.app.dependency_overrides[create_supabase_client] = lambda: supabase
+
+    with TestClient(main.app) as client:
+        response = client.post(
+            "/api/v1/auth/login",
+            data={"username": "user@example.com", "password": "bad"},
+        )
+
+    assert response.status_code == 401
+    assert response.json() == {"message": "Invalid credentials", "code": "INVALID"}
+
+
+def test_login_rejects_missing_session() -> None:
+    supabase = _make_supabase_client(
+        sign_in_with_password=SimpleNamespace(session=None),
     )
     main.app.dependency_overrides[create_supabase_client] = lambda: supabase
 
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/login",
-            json={"email": "user@example.com", "password": "bad"},
+            data={"username": "user@example.com", "password": "secret"},
         )
 
     assert response.status_code == 401
-    assert response.json() == {"message": "Invalid credentials", "code": "INVALID"}
+    assert response.json() == {
+        "message": "Invalid email or password",
+        "code": "UNAUTHORIZED",
+    }
+
+
+def test_me_returns_current_user_profile() -> None:
+    current_user = AuthenticatedUser(
+        id="00000000-0000-0000-0000-000000000001",
+        username="jane",
+        email="jane@example.com",
+        role=UserRole.STUDENT,
+    )
+    main.app.dependency_overrides[get_current_user] = lambda: current_user
+
+    with TestClient(main.app) as client:
+        response = client.get("/api/v1/auth/me")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "username": "jane",
+        "email": "jane@example.com",
+        "role": "student",
+    }
 
 
 def test_signup_returns_created_session(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -103,7 +137,7 @@ def test_signup_returns_created_session(monkeypatch: pytest.MonkeyPatch) -> None
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/signup",
-            json={"email": "user@example.com", "password": "secret"},
+            data={"username": "user@example.com", "password": "secret"},
         )
 
     assert response.status_code == 201
@@ -121,7 +155,7 @@ def test_signup_raises_when_session_is_missing(monkeypatch: pytest.MonkeyPatch) 
     with TestClient(main.app) as client:
         response = client.post(
             "/api/v1/auth/signup",
-            json={"email": "user@example.com", "password": "secret"},
+            data={"username": "user@example.com", "password": "secret"},
         )
 
     assert response.status_code == 400
@@ -133,11 +167,7 @@ def test_signup_raises_when_session_is_missing(monkeypatch: pytest.MonkeyPatch) 
 
 def test_refresh_returns_new_session(monkeypatch: pytest.MonkeyPatch) -> None:
     supabase = _make_supabase_client(
-        refresh_session=SimpleNamespace(
-            session=_make_session(
-                access_token="new-access", refresh_token="new-refresh", expires_in=90
-            )
-        ),
+        refresh_session=SimpleNamespace(session=_make_session(access_token="new-access", refresh_token="new-refresh", expires_in=90)),
     )
     main.app.dependency_overrides[create_supabase_client] = lambda: supabase
 
@@ -173,12 +203,8 @@ def test_refresh_rejects_missing_session(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_logout_signs_out_and_returns_accepted(monkeypatch: pytest.MonkeyPatch) -> None:
-    supabase = _make_supabase_client(
-        set_session=SimpleNamespace(user=SimpleNamespace(id="user-1"))
-    )
-    monkeypatch.setattr(
-        logout_module, "create_supabase_client", AsyncMock(return_value=supabase)
-    )
+    supabase = _make_supabase_client(set_session=SimpleNamespace(user=SimpleNamespace(id="user-1")))
+    monkeypatch.setattr(logout_module, "create_supabase_client", AsyncMock(return_value=supabase))
 
     with TestClient(main.app) as client:
         response = client.post(
@@ -199,12 +225,8 @@ def test_logout_signs_out_and_returns_accepted(monkeypatch: pytest.MonkeyPatch) 
 def test_logout_converts_supabase_auth_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(logout_module, "AuthApiError", FakeAuthApiError)
     supabase = _make_supabase_client()
-    supabase.auth.set_session.side_effect = FakeAuthApiError(
-        403, "Forbidden", "FORBIDDEN"
-    )
-    monkeypatch.setattr(
-        logout_module, "create_supabase_client", AsyncMock(return_value=supabase)
-    )
+    supabase.auth.set_session.side_effect = FakeAuthApiError(403, "Forbidden", "FORBIDDEN")
+    monkeypatch.setattr(logout_module, "create_supabase_client", AsyncMock(return_value=supabase))
 
     with TestClient(main.app) as client:
         response = client.post(

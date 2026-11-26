@@ -1,8 +1,8 @@
-from functools import lru_cache
 import logging
+from functools import lru_cache
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,6 @@ class Settings(BaseSettings):
             return
 
         message = f"Missing required backend configuration values: {', '.join(missing)}."
-
 
         if self.app_env.lower() in {"development", "dev", "local"}:
             logger.warning(message)

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, ClassVar
 from uuid import UUID, uuid4
 
@@ -17,9 +17,7 @@ from sqlmodel import Field, SQLModel
 
 class Result(SQLModel, table=True):
     __tablename__: ClassVar[str] = "result"
-    __table_args__ = (
-        CheckConstraint("score >= 0 AND score <= 100", name="score_range"),
-    )
+    __table_args__ = (CheckConstraint("score >= 0 AND score <= 100", name="score_range"),)
 
     id: UUID = Field(
         default_factory=uuid4,
@@ -35,21 +33,13 @@ class Result(SQLModel, table=True):
         )
     )
     score: int = Field(sa_column=Column(Integer, nullable=False))
-    ai_feedback: dict[str, Any] | None = Field(
-        default=None, sa_column=Column(JSONB, nullable=True)
-    )
-    exec_time: float | None = Field(
-        default=None, sa_column=Column(Float, nullable=True)
-    )
+    ai_feedback: dict[str, Any] | None = Field(default=None, sa_column=Column(JSONB, nullable=True))
+    exec_time: float | None = Field(default=None, sa_column=Column(Float, nullable=True))
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column=Column(
-            DateTime(timezone=True), nullable=False, server_default=func.now()
-        ),
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(DateTime(timezone=True), nullable=False, server_default=func.now()),
     )
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
-        sa_column=Column(
-            DateTime(timezone=True), nullable=False, server_default=func.now()
-        ),
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(DateTime(timezone=True), nullable=False, server_default=func.now()),
     )

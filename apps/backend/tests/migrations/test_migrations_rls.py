@@ -1,17 +1,12 @@
-from unittest.mock import MagicMock
 import importlib.util
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
 
 def _load_migration_module():
-    migration_path = (
-        Path(__file__).resolve().parents[2]
-        / "alembic"
-        / "versions"
-        / "bf3f1bab7a24_add_initial_rls_policies.py"
-    )
+    migration_path = Path(__file__).resolve().parents[2] / "alembic" / "versions" / "bf3f1bab7a24_add_initial_rls_policies.py"
     spec = importlib.util.spec_from_file_location("migration_rls", migration_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -48,9 +43,7 @@ def test_upgrade_creates_problem_public_read_policy(
     migration.upgrade()
 
     executed_sql = [call.args[0] for call in execute_mock.call_args_list]
-    assert any(
-        "CREATE POLICY problem_public_read_policy" in sql for sql in executed_sql
-    )
+    assert any("CREATE POLICY problem_public_read_policy" in sql for sql in executed_sql)
 
 
 # Verifies downgrade removes the public read policy before disabling RLS.

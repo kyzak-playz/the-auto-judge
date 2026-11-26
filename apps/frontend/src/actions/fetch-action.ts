@@ -6,9 +6,9 @@ import { ApiResponse } from "@/types/response-types";
 /**
  * A custom fetch function that checks for the presence of a refresh token before making an API call.
  */
-export const fetchAction = async<Data> (
+export const fetchAction = async <Data>(
   request: RequestInfo,
-  init: RequestInit,
+  init: RequestInit
 ): Promise<ApiResponse<Data>> => {
   try {
     const cookieStore = await cookies();
@@ -26,7 +26,10 @@ export const fetchAction = async<Data> (
       };
     }
 
-    const response = await fetch(request, init); // Make the API call with the provided request and init parameters
+    // build full bakend url for outgoing request
+    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}${request}`;
+
+    const response = await fetch(backendUrl, init); // Make the API call with the provided request and init parameters
 
     // If the response is not ok, return an error response
     if (!response.ok) {
@@ -51,7 +54,7 @@ export const fetchAction = async<Data> (
     throw makeError(
       `Fetch action failed: ${error instanceof Error ? error.message : String(error)}`,
       500,
-      "FetchActionError",
+      "FetchActionError"
     );
   }
 };

@@ -1,23 +1,35 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, status, Body
-from app.core.deps import get_current_user
-from app.exceptions import HTTPException
-from app.services.problem_service import ProblemsService
-from app.schemas.problem_service_schemas import ProblemCreateSchema, ProblemListSchema
+
+from fastapi import APIRouter, Body, Depends, status
+from sqlmodel import Session
+
 from app.core.database import get_session
-from app.schemas.auth_schema import SupabaseUser
-
-
+from app.core.deps import require_role
+from app.exceptions import HTTPException
+from app.models.enums import UserRole
+from app.schemas.auth_schema import AuthenticatedUser
+from app.schemas.problem_service_schemas import ProblemCreateSchema, ProblemListSchema
+from app.services.problem_service import ProblemsService
 
 router = APIRouter()
 
-@router.post("/", tags=["Problems"], status_code=status.HTTP_201_CREATED, response_model=ProblemListSchema)
-def create_problem(user: Annotated[SupabaseUser, Depends(get_current_user)], problem_data: Annotated[ProblemCreateSchema, Body(...)], session = Depends(get_session)):
+
+@router.post(
+    "/",
+    tags=["Problems"],
+    status_code=status.HTTP_201_CREATED,
+    response_model=ProblemListSchema,
+)
+def create_problem(
+    user: Annotated[AuthenticatedUser, Depends(require_role(UserRole.ADMIN))],
+    problem_data: Annotated[ProblemCreateSchema, Body(...)],
+    session: Annotated[Session, Depends(get_session)],
+):
     """
     Create a new problem.
 
     Args:
-        user (SupabaseUser): The current authenticated user.
+        user (AuthenticatedUser): The current authenticated user.
         problem_data (ProblemCreateSchema): The data for the new problem.
 
     Returns:
@@ -39,5 +51,5 @@ def create_problem(user: Annotated[SupabaseUser, Depends(get_current_user)], pro
         raise HTTPException(
             status=500,
             message=f"An error occurred while creating the problem: {str(e)}",
-            code="PROBLEM_CREATION_ERROR"
-        )
+            code="PROBLEM_CREATION_ERROR",
+        ) from e

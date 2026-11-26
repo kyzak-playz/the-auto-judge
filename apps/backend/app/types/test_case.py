@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from typing import Any, TypedDict
 
-class TestCase(BaseModel):
-    input: list[str]
-    output: str
-    hidden: bool
+
+class ProblemTestCases(TypedDict):
+    inputs: list[list[Any]]
+    fn_name: str
+    outputs: list[Any]

@@ -10,7 +10,6 @@ from app.exceptions import (
     HTTPException,
     fastapi_http_exception_handler,
     http_exception_handler,
-    validation_exception_handler,
 )
 
 

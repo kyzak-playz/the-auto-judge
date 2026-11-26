@@ -10,10 +10,13 @@ import { ApiResponse } from "@/types/response-types";
  * @param init The initialization options for the fetch function.
  * @returns (ApiResponse<Data>) A promise resolving to the API response.
  */
-const clientFetch = async <Data>(input: RequestInfo, init?: RequestInit): Promise<ApiResponse<Data>> => {
-  const user = useAuthStore.getState().user; // use getState method to get the current value
+const clientFetch = async <Data>(
+  input: RequestInfo,
+  init?: RequestInit
+): Promise<ApiResponse<Data>> => {
+  const session = useAuthStore.getState().session;
 
-  if (!user || !user.access_token) {
+  if (!session || !session.access_token) {
     throw makeError("No access token found", 401, "NoAccessTokenError");
   }
 
@@ -22,7 +25,7 @@ const clientFetch = async <Data>(input: RequestInfo, init?: RequestInit): Promis
     ...init,
     headers: {
       ...init?.headers,
-      Authorization: `Bearer ${user.access_token}`,
+      Authorization: `Bearer ${session.access_token}`,
     },
   };
 
@@ -72,7 +75,7 @@ const clientFetch = async <Data>(input: RequestInfo, init?: RequestInit): Promis
       }
 
       // Update the access token in the auth store
-      useAuthStore.getState().setUser({
+      useAuthStore.getState().setSession({
         access_token: refreshResponse.data.accessToken,
         expires_in: refreshResponse.data.expires_in,
       });
@@ -92,7 +95,7 @@ const clientFetch = async <Data>(input: RequestInfo, init?: RequestInit): Promis
     throw makeError(
       `Client fetch failed: ${error instanceof Error ? error.message : String(error)}`,
       500,
-      "ClientFetchError",
+      "ClientFetchError"
     );
   }
 };

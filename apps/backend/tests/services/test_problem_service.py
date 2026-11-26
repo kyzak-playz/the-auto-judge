@@ -1,8 +1,6 @@
 from types import SimpleNamespace
 from uuid import uuid4
 
-import pytest
-
 from app.models.enums import UserRole
 from app.schemas.problem_service_schemas import ProblemListSchema
 from app.services import problem_service as service_module

@@ -1,7 +1,7 @@
-import os
 import json
+import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -44,7 +44,7 @@ def simulate_file_write_task(self, message: str = "ping") -> dict[str, str]:
     payload = {
         "task_id": task_id,
         "message": message,
-        "processed_at": datetime.now(timezone.utc).isoformat(),
+        "processed_at": datetime.now(UTC).isoformat(),
     }
 
     result_file = TASK_RESULTS_DIR / f"{task_id}.json"

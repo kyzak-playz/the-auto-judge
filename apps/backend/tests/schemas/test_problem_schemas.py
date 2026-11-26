@@ -10,8 +10,9 @@ from app.schemas.problem_service_schemas import (
     ProblemDetailSchema,
     ProblemUpdateSchema,
 )
+from app.types.test_case import ProblemTestCases
 
-TEST_CASE = {
+TEST_CASE: ProblemTestCases = {
     "inputs": [['"1 + 1"']],
     "fn_name": "calculate",
     "outputs": [2],
@@ -35,7 +36,10 @@ def test_problem_create_and_update_schemas_match_stored_test_case_shape() -> Non
 
 
 def test_problem_model_default_uses_test_case_contract() -> None:
-    problem = Problem(title="Calculator")
+    problem = Problem(
+        title="Calculator",
+        difficulty=ProblemDifficulty.EASY,
+        )
 
     assert problem.test_case == {
         "inputs": [],
@@ -64,4 +68,4 @@ def test_problem_update_allows_omitted_fields_but_rejects_null_values() -> None:
     assert ProblemUpdateSchema().model_dump(exclude_unset=True) == {}
 
     with pytest.raises(ValidationError):
-        ProblemUpdateSchema(title=None)
+        ProblemUpdateSchema.model_validate({"title": None})

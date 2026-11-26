@@ -29,10 +29,13 @@ class ProblemBaseSchema(BaseModel):
 
 
 class ProblemUpdateSchema(BaseModel):
-    title: str | None = Field(default=None)
-    description: str | None = Field(default=None)
-    difficulty: ProblemDifficulty | None = Field(default=None)
-    test_case: ProblemTestCases | None = Field(default=None)
+    # pylance flags this as an error because the fields are not optional,
+    # but they are actually optional in this context.
+    # This is a workaround to avoid the error.
+    title: str = Field(default=None) # pyright: ignore[reportAssignmentType]
+    description: str = Field(default=None) # pyright: ignore[reportAssignmentType]
+    difficulty: ProblemDifficulty = Field(default=None) # pyright: ignore[reportAssignmentType]
+    test_case: ProblemTestCases = Field(default=None) # pyright: ignore[reportAssignmentType]
 
 
 class ProblemListSchema(BaseModel):
